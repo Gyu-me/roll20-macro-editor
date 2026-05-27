@@ -34,6 +34,8 @@ export type MacroTemplate = {
   name: string;
   memo: string;
   previewText: string;
+  previewCode?: string;
+  previewBackground?: string;
   keywords: string[];
   code: string;
   colorPresets?: ColorPreset[];
