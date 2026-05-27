@@ -1,5 +1,5 @@
-import MacroEditor from "@/components/MacroEditor";
+import AppShell from "@/components/AppShell";
 
 export default function Home() {
-  return <MacroEditor />;
+  return <AppShell />;
 }
