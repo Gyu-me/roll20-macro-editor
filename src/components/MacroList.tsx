@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { MacroCategory, MacroTemplate } from "@/types/macro";
+import { roll20CodeToHtml } from "@/utils/roll20Preview";
+import { applyFieldValues, parseTemplateFields } from "@/utils/templateFields";
 
 type MacroListProps = {
   categories: MacroCategory[];
@@ -9,6 +11,20 @@ type MacroListProps = {
   selectedId: string;
   onSelect: (template: MacroTemplate) => void;
 };
+
+function getTemplateThumbnailHtml(template: MacroTemplate): string {
+  if (!template.code) return template.previewText;
+  const activeCode =
+    template.variants?.[0]?.code ?? template.code;
+  const fields = parseTemplateFields(activeCode);
+  const values = {
+    ...Object.fromEntries(fields.map((f) => [f.key, f.defaultValue])),
+    ...(template.fieldDefaults ?? {}),
+  };
+  const resolved = applyFieldValues(activeCode, fields, values);
+  const html = roll20CodeToHtml(resolved);
+  return html || template.previewText;
+}
 
 export default function MacroList({
   categories,
@@ -19,26 +35,23 @@ export default function MacroList({
   const [query, setQuery] = useState("");
 
   const filteredTemplates = useMemo(() => {
-    const trimmedQuery = query.trim().toLowerCase();
-
-    if (!trimmedQuery) {
-      return templates;
-    }
-
-    return templates.filter((template) => {
-      const searchableText = [
-        template.name,
-        template.memo,
-        template.previewText,
-        template.categoryId,
-        ...template.keywords,
-      ]
+    const q = query.trim().toLowerCase();
+    if (!q) return templates;
+    return templates.filter((t) =>
+      [t.name, t.memo, t.previewText, t.categoryId, ...t.keywords]
         .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(trimmedQuery);
-    });
+        .toLowerCase()
+        .includes(q),
+    );
   }, [query, templates]);
+
+  const thumbnails = useMemo(
+    () =>
+      Object.fromEntries(
+        templates.map((t) => [t.id, getTemplateThumbnailHtml(t)]),
+      ),
+    [templates],
+  );
 
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
 
@@ -56,7 +69,7 @@ export default function MacroList({
           type="search"
           placeholder="기능명, 메모, 키워드 검색"
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
         />
       </div>
 
@@ -64,13 +77,11 @@ export default function MacroList({
 
       <nav className="category-list" aria-label="매크로 카테고리 목록">
         {sortedCategories.map((category) => {
-          const categoryTemplates = filteredTemplates
-            .filter((template) => template.categoryId === category.id)
+          const items = filteredTemplates
+            .filter((t) => t.categoryId === category.id)
             .sort((a, b) => a.order - b.order);
 
-          if (categoryTemplates.length === 0) {
-            return null;
-          }
+          if (items.length === 0) return null;
 
           return (
             <section key={category.id} className="category-section">
@@ -80,18 +91,26 @@ export default function MacroList({
               </div>
 
               <div className="macro-items">
-                {categoryTemplates.map((template) => {
-                  const isSelected = template.id === selectedId;
+                {items.map((template) => {
+                  const html = thumbnails[template.id] ?? template.previewText;
+                  const isHtml = html.includes("<");
 
                   return (
                     <button
                       key={template.id}
                       type="button"
-                      className={`macro-item ${isSelected ? "is-selected" : ""}`}
+                      className={`macro-item${template.id === selectedId ? " is-selected" : ""}`}
                       onClick={() => onSelect(template)}
                     >
                       <span className="macro-preview">
-                        {template.previewText}
+                        {isHtml ? (
+                          <span
+                            className="macro-preview-html"
+                            dangerouslySetInnerHTML={{ __html: html }}
+                          />
+                        ) : (
+                          html
+                        )}
                       </span>
 
                       <span className="macro-text">
