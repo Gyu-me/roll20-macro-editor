@@ -3,8 +3,8 @@ import type { MacroCategory } from "@/types/macro";
 export const macroCategories: MacroCategory[] = [
   {
     id: "basic",
-    name: "자주 쓰는 기본",
-    description: "GM이 세션 중 가장 자주 쓰는 기본 출력",
+    name: "기본",
+    description: "기본 출력",
     order: 1,
   },
   {
@@ -15,26 +15,26 @@ export const macroCategories: MacroCategory[] = [
   },
   {
     id: "secret",
-    name: "귓말 / 비밀 처리",
-    description: "GM 귓말, 캐릭터 귓말, 비밀 판정, 블러",
+    name: "귓말",
+    description: "GM 귓말, 캐릭터 귓말",
     order: 3,
   },
   {
     id: "scene",
     name: "장면 연출",
-    description: "가름선, 챕터, BGM, 시계, 네온 효과",
+    description: "가름선, 챕터, BGM, 시계, 블러",
     order: 4,
   },
   {
     id: "info",
-    name: "정보 / 핸드아웃",
+    name: "정보 / 핸드아웃 / 블러 처리",
     description: "핸드아웃, 조사 포인트, 얇은 글씨",
     order: 5,
   },
   {
     id: "decorate",
     name: "강조 / 꾸밈",
-    description: "색상 강조, 굵게, 기울임, 박스 강조",
+    description: "색상 강조, 굵게, 기울임, 박스 강조, 네온 효과",
     order: 6,
   },
   {

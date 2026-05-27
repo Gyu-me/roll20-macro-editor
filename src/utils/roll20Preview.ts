@@ -10,7 +10,8 @@ export function roll20CodeToHtml(code: string): string {
             .replaceAll("&rpar;", ")")
             .replaceAll("&#44;", ",");
         const safeHref = href.trim() || "#";
-        return `<a href="${safeHref}" style="${decode(style)}" onclick="return false;">${decode(text)}</a>`;
+        const cleanStyle = decode(style).replace(/"\s*$/, "").trim();
+        return `<a href="${safeHref}" style="${cleanStyle}" onclick="return false;">${decode(text)}</a>`;
       },
     )
     .replace(/\*\*\*([\s\S]*?)\*\*\*/g, "<strong><em>$1</em></strong>")

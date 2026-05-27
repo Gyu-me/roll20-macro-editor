@@ -14,8 +14,7 @@ type MacroListProps = {
 
 function getTemplateThumbnailHtml(template: MacroTemplate): string {
   if (!template.code) return template.previewText;
-  const activeCode =
-    template.variants?.[0]?.code ?? template.code;
+  const activeCode = template.variants?.[0]?.code ?? template.code;
   const fields = parseTemplateFields(activeCode);
   const values = {
     ...Object.fromEntries(fields.map((f) => [f.key, f.defaultValue])),
@@ -59,7 +58,7 @@ export default function MacroList({
     <aside className="macro-sidebar">
       <div className="sidebar-header">
         <h1>Roll20 매크로 편집기</h1>
-        <p>TRPG GM용 매크로를 정리하고 생성합니다.</p>
+        <p>나 편하자구 만든 TRPG GM용 매크로 </p>
       </div>
 
       <div className="search-area">

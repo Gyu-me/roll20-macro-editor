@@ -11,6 +11,21 @@
   --muted: #777777;
   --primary: #222222;
   --accent: #ff0053;
+
+  --color-red: #EF1E2B;
+  --color-pink: #EF1B62;
+  --color-orange: #FE8A01;
+  --color-yellow: #F4C540;
+  --color-lime: #86BD03;
+  --color-green: #31A749;
+  --color-cyan: #03E4FD;
+  --color-blue: #253BFE;
+  --color-navy: #022B92;
+  --color-purple: #8424FA;
+  --color-black: #11182A;
+  --color-dark-gray: #343434;
+  --color-gray: #666666;
+  --color-white: #FFFFFF;
 }
 
 html,
@@ -38,7 +53,7 @@ button {
 
 .editor-layout {
   display: grid;
-  grid-template-columns: 360px minmax(420px, 1fr) minmax(460px, 1.1fr);
+  grid-template-columns: 320px minmax(560px, 1.3fr) minmax(440px, 1fr);
   min-height: 100vh;
 }
 
@@ -211,9 +226,16 @@ button {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  min-height: 76px;
   margin-bottom: 16px;
+  padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
+}
+
+.top-bar-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
 }
 
 .top-bar h2 {
@@ -226,6 +248,29 @@ button {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 13px;
+}
+
+.top-bar-memo {
+  width: 100%;
+  min-height: 52px;
+  max-height: 120px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  font-size: 13px;
+  color: var(--text);
+  resize: vertical;
+  line-height: 1.5;
+  outline: none;
+}
+
+.top-bar-memo:focus {
+  border-color: var(--primary);
+}
+
+.top-bar-memo::placeholder {
+  color: var(--muted);
 }
 
 .category-label {
@@ -397,10 +442,12 @@ textarea:focus {
 }
 
 .field-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .field-row:last-child {
@@ -408,9 +455,26 @@ textarea:focus {
 }
 
 .field-label {
+  display: block;
+  flex: 0 0 80px;
+  width: 80px;
+  padding-top: 11px;
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
+  word-break: keep-all;
+  line-height: 1.4;
+}
+
+.field-input-area {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.field-input-area textarea {
+  min-height: 64px;
+  resize: vertical;
 }
 
 .color-field-row {
@@ -506,4 +570,121 @@ textarea:focus {
   white-space: nowrap;
   font-style: normal;
   max-width: 220%;
+}
+
+/* palette section */
+.palette-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.palette-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.default-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.default-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.default-swatch:hover {
+  transform: scale(1.25);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+
+.color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.palette-swatch-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.palette-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: transform 0.1s;
+  padding: 0;
+}
+
+.palette-swatch:hover {
+  transform: scale(1.1);
+  border-color: #888;
+}
+
+.swatch-delete {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #444;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.palette-swatch-wrap:hover .swatch-delete {
+  display: flex;
+}
+
+.swatch-delete:hover {
+  background: #EF1E2B;
+}
+
+.save-color-btn {
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 10px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: none;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.save-color-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.no-fields-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
 }
