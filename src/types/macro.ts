@@ -16,6 +16,17 @@ export type MacroCategory = {
   order: number;
 };
 
+export type ColorPreset = {
+  name: string;
+  values: Record<string, string>; // colorName (without #) → hex value
+};
+
+export type StyleVariant = {
+  id: string;
+  name: string;
+  code: string;
+};
+
 export type MacroTemplate = {
   id: string;
   categoryId: MacroCategoryId;
@@ -25,4 +36,7 @@ export type MacroTemplate = {
   previewText: string;
   keywords: string[];
   code: string;
+  colorPresets?: ColorPreset[];
+  variants?: StyleVariant[];
+  fieldDefaults?: Record<string, string>;
 };
