@@ -10,6 +10,7 @@ export type ScriptLineType =
   | "divider"
   | "roll"
   | "emphasis"
+  | "raw"
   | "custom";
 
 export type ScriptLine = {

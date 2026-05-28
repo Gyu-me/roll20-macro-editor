@@ -9,7 +9,7 @@ type Props = {
   settings: EditorSettings;
   onUpdateLine: (id: string, content: string) => void;
   onDeleteLine: (id: string) => void;
-  onAddLine: (labelId: string, afterId?: string) => void;
+  onAddLine: (labelId: string, afterId?: string, content?: string) => void;
 };
 
 export default function ScriptEditor({

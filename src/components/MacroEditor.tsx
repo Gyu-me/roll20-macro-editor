@@ -21,32 +21,42 @@ const DEFAULT_PALETTE = [
   "#666666", "#FFFFFF",
 ];
 
-export default function MacroEditor() {
+type MacroEditorProps = {
+  compact?: boolean;
+  onAddToScript?: (code: string) => void;
+};
+
+export default function MacroEditor({ compact, onAddToScript }: MacroEditorProps) {
   const [selectedTemplate, setSelectedTemplate] = useState<MacroTemplate>(
     macroTemplates[0],
   );
 
   return (
-    <main className="editor-layout">
+    <main className={compact ? "compact-editor-layout" : "editor-layout"}>
       <MacroList
         categories={macroCategories}
         templates={macroTemplates}
         selectedId={selectedTemplate.id}
         onSelect={setSelectedTemplate}
+        compact={compact}
       />
       <MacroEditorPanels
         key={selectedTemplate.id}
         selectedTemplate={selectedTemplate}
+        compact={compact}
+        onAddToScript={onAddToScript}
       />
     </main>
   );
 }
 
-type MacroEditorPanelsProps = {
+export type MacroEditorPanelsProps = {
   selectedTemplate: MacroTemplate;
+  compact?: boolean;
+  onAddToScript?: (code: string) => void;
 };
 
-function MacroEditorPanels({ selectedTemplate }: MacroEditorPanelsProps) {
+export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: MacroEditorPanelsProps) {
   const { colors: customPalette, saveColor, removeColor } = useColorPalette();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
@@ -151,6 +161,192 @@ function MacroEditorPanels({ selectedTemplate }: MacroEditorPanelsProps) {
     ? { background: selectedTemplate.previewBackground }
     : undefined;
 
+  const handleAddToScript = () => {
+    if (onAddToScript && finalCode) {
+      onAddToScript(finalCode);
+    }
+  };
+
+  const editFields = (
+    <>
+      {/* Variant selector */}
+      {selectedTemplate.variants && selectedTemplate.variants.length > 0 && (
+        <section className="card">
+          <h3>스타일 선택</h3>
+          <div className="variant-buttons">
+            {selectedTemplate.variants.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                className={`variant-btn${selectedVariantId === v.id ? " is-active" : ""}`}
+                onClick={() => handleVariantChange(v)}
+              >
+                {v.name}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Color presets + color fields */}
+      {(selectedTemplate.colorPresets?.length || colorFields.length > 0) ? (
+        <section className="card">
+          {selectedTemplate.colorPresets && selectedTemplate.colorPresets.length > 0 && (
+            <>
+              <h3>컬러 프리셋</h3>
+              <div className="preset-buttons" style={{ marginBottom: colorFields.length > 0 ? 16 : 0 }}>
+                {selectedTemplate.colorPresets.map((preset) => {
+                  const firstColor = Object.values(preset.values)[0] ?? "#333";
+                  return (
+                    <button
+                      key={preset.name}
+                      type="button"
+                      className="preset-btn"
+                      style={{ background: firstColor }}
+                      onClick={() => handlePresetSelect(preset)}
+                      title={preset.name}
+                    >
+                      {preset.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {colorFields.length > 0 && (
+            <>
+              {selectedTemplate.colorPresets && selectedTemplate.colorPresets.length > 0 && (
+                <h3 style={{ marginBottom: 12 }}>색상 편집</h3>
+              )}
+              {!selectedTemplate.colorPresets?.length && <h3>색상 편집</h3>}
+              {colorFields.map((field) => (
+                <ColorFieldInput
+                  key={field.key}
+                  field={field}
+                  value={fieldValues[field.key] ?? field.defaultValue}
+                  onChange={(v) => handleFieldChange(field.key, v)}
+                  customPalette={customPalette}
+                  onSaveColor={saveColor}
+                  onRemoveColor={removeColor}
+                />
+              ))}
+            </>
+          )}
+        </section>
+      ) : null}
+
+      {/* Text fields */}
+      {textFields.length > 0 && (
+        <section className="card">
+          <h3>내용 편집</h3>
+          {textFields.map((field) => (
+            <TextFieldInput
+              key={field.key}
+              field={field}
+              value={fieldValues[field.key] ?? field.defaultValue}
+              onChange={(v) => handleFieldChange(field.key, v)}
+            />
+          ))}
+        </section>
+      )}
+
+      {colorFields.length === 0 && textFields.length === 0 && (
+        <section className="card">
+          <p className="no-fields-hint">이 템플릿은 편집 가능한 필드가 없습니다.</p>
+        </section>
+      )}
+
+      <section className="card">
+        <div className="card-title-row">
+          <h3>Roll20 코드 직접 편집</h3>
+          <span className="helper-text">
+            {codeOverride !== null ? "직접 수정 중" : "자동 생성됨"}
+          </span>
+        </div>
+        <textarea
+          value={finalCode}
+          onChange={(e) => setCodeOverride(e.target.value)}
+          aria-label="Roll20 코드 직접 편집"
+        />
+        {codeOverride !== null && (
+          <button
+            type="button"
+            className="reset-code-button"
+            onClick={() => setCodeOverride(null)}
+          >
+            자동 생성으로 되돌리기
+          </button>
+        )}
+      </section>
+    </>
+  );
+
+  const finalCodeSection = (
+    <section className="card">
+      <div className="card-title-row">
+        <h3>Roll20 최종 코드</h3>
+        <div style={{ display: "flex", gap: 6 }}>
+          {onAddToScript && (
+            <button
+              type="button"
+              className="add-to-script-button"
+              onClick={handleAddToScript}
+              title="스크립트 편집기에 이 코드를 추가합니다"
+            >
+              + 스크립트에 추가
+            </button>
+          )}
+          <button
+            type="button"
+            className="copy-button"
+            onClick={handleCopyFinalCode}
+          >
+            코드 복사
+          </button>
+        </div>
+      </div>
+      <textarea readOnly value={finalCode} aria-label="Roll20 최종 코드" />
+      {copyMessage && <p className="copy-message">{copyMessage}</p>}
+    </section>
+  );
+
+  if (compact) {
+    return (
+      <div className="compact-panels">
+        <div className="compact-panels-header">
+          <p className="category-label">{selectedTemplate.categoryId}</p>
+          <h3 className="compact-template-name">{selectedTemplate.name}</h3>
+        </div>
+
+        <div className="compact-preview-wrap">
+          <span className="compact-preview-label">미리보기</span>
+          <div
+            className="compact-preview-box roll20-preview"
+            style={previewBoxStyle}
+            dangerouslySetInnerHTML={{
+              __html:
+                previewHtml ||
+                '<span style="color:#aaa;font-size:13px;">미리보기 없음</span>',
+            }}
+          />
+        </div>
+
+        {finalCodeSection}
+
+        <textarea
+          className="top-bar-memo compact-memo"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+          placeholder="메모..."
+          aria-label="메모"
+        />
+
+        {editFields}
+      </div>
+    );
+  }
+
   return (
     <>
       <section className="edit-panel">
@@ -167,117 +363,7 @@ function MacroEditorPanels({ selectedTemplate }: MacroEditorPanelsProps) {
             />
           </div>
         </div>
-
-        {/* Variant selector */}
-        {selectedTemplate.variants && selectedTemplate.variants.length > 0 && (
-          <section className="card">
-            <h3>스타일 선택</h3>
-            <div className="variant-buttons">
-              {selectedTemplate.variants.map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  className={`variant-btn${selectedVariantId === v.id ? " is-active" : ""}`}
-                  onClick={() => handleVariantChange(v)}
-                >
-                  {v.name}
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Color presets + color fields */}
-        {(selectedTemplate.colorPresets?.length || colorFields.length > 0) ? (
-          <section className="card">
-            {selectedTemplate.colorPresets && selectedTemplate.colorPresets.length > 0 && (
-              <>
-                <h3>컬러 프리셋</h3>
-                <div className="preset-buttons" style={{ marginBottom: colorFields.length > 0 ? 16 : 0 }}>
-                  {selectedTemplate.colorPresets.map((preset) => {
-                    const firstColor = Object.values(preset.values)[0] ?? "#333";
-                    return (
-                      <button
-                        key={preset.name}
-                        type="button"
-                        className="preset-btn"
-                        style={{ background: firstColor }}
-                        onClick={() => handlePresetSelect(preset)}
-                        title={preset.name}
-                      >
-                        {preset.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
-            {colorFields.length > 0 && (
-              <>
-                {selectedTemplate.colorPresets && selectedTemplate.colorPresets.length > 0 && (
-                  <h3 style={{ marginBottom: 12 }}>색상 편집</h3>
-                )}
-                {!selectedTemplate.colorPresets?.length && <h3>색상 편집</h3>}
-                {colorFields.map((field) => (
-                  <ColorFieldInput
-                    key={field.key}
-                    field={field}
-                    value={fieldValues[field.key] ?? field.defaultValue}
-                    onChange={(v) => handleFieldChange(field.key, v)}
-                    customPalette={customPalette}
-                    onSaveColor={saveColor}
-                    onRemoveColor={removeColor}
-                  />
-                ))}
-              </>
-            )}
-          </section>
-        ) : null}
-
-        {/* Text fields */}
-        {textFields.length > 0 && (
-          <section className="card">
-            <h3>내용 편집</h3>
-            {textFields.map((field) => (
-              <TextFieldInput
-                key={field.key}
-                field={field}
-                value={fieldValues[field.key] ?? field.defaultValue}
-                onChange={(v) => handleFieldChange(field.key, v)}
-              />
-            ))}
-          </section>
-        )}
-
-        {colorFields.length === 0 && textFields.length === 0 && (
-          <section className="card">
-            <p className="no-fields-hint">이 템플릿은 편집 가능한 필드가 없습니다.</p>
-          </section>
-        )}
-
-        <section className="card">
-          <div className="card-title-row">
-            <h3>Roll20 코드 직접 편집</h3>
-            <span className="helper-text">
-              {codeOverride !== null ? "직접 수정 중" : "자동 생성됨"}
-            </span>
-          </div>
-          <textarea
-            value={finalCode}
-            onChange={(e) => setCodeOverride(e.target.value)}
-            aria-label="Roll20 코드 직접 편집"
-          />
-          {codeOverride !== null && (
-            <button
-              type="button"
-              className="reset-code-button"
-              onClick={() => setCodeOverride(null)}
-            >
-              자동 생성으로 되돌리기
-            </button>
-          )}
-        </section>
+        {editFields}
       </section>
 
       <section className="preview-panel">
@@ -298,20 +384,7 @@ function MacroEditorPanels({ selectedTemplate }: MacroEditorPanelsProps) {
           }}
         />
 
-        <section className="card">
-          <div className="card-title-row">
-            <h3>Roll20 최종 코드</h3>
-            <button
-              type="button"
-              className="copy-button"
-              onClick={handleCopyFinalCode}
-            >
-              코드 복사
-            </button>
-          </div>
-          <textarea readOnly value={finalCode} aria-label="Roll20 최종 코드" />
-          {copyMessage && <p className="copy-message">{copyMessage}</p>}
-        </section>
+        {finalCodeSection}
 
         <section className="card">
           <h3>현재 선택한 기능 정보</h3>
