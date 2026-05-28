@@ -48,6 +48,7 @@ export type LabelSetting = {
   roll20Style?: string;
   order: number;
   excludeFromOutput?: boolean;
+  isDefault?: boolean;
 };
 
 export type EditorSettings = {

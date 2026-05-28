@@ -8,6 +8,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#ffffff",
     command: "/desc",
     order: 1,
+    isDefault: true,
   },
   {
     id: "dialogue",
@@ -16,6 +17,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#ffffff",
     command: `/as "?{누구}"`,
     order: 2,
+    isDefault: true,
   },
   {
     id: "whisper",
@@ -24,6 +26,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#f8f8f8",
     command: "/w gm",
     order: 3,
+    isDefault: true,
   },
   {
     id: "investigation",
@@ -32,6 +35,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#ffffff",
     command: "/desc",
     order: 4,
+    isDefault: true,
   },
   {
     id: "roll",
@@ -40,6 +44,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#EEF3FF",
     command: "/desc",
     order: 5,
+    isDefault: true,
   },
   {
     id: "emphasis",
@@ -49,6 +54,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     command: "/desc",
     roll20Style: "color: #C0392B; font-weight: bold;",
     order: 6,
+    isDefault: true,
   },
   {
     id: "memo",
@@ -58,6 +64,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     command: "",
     order: 7,
     excludeFromOutput: true,
+    isDefault: true,
   },
   {
     id: "handout",
@@ -66,6 +73,7 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#F8F0FF",
     command: "/desc",
     order: 8,
+    isDefault: true,
   },
   {
     id: "divider",
@@ -74,5 +82,6 @@ export const DEFAULT_LABELS: LabelSetting[] = [
     backgroundColor: "#F5F5F5",
     command: "/desc",
     order: 9,
+    isDefault: true,
   },
 ];
