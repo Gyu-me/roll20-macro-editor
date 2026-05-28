@@ -16,7 +16,7 @@ type Props = {
   editorMode: EditorMode;
   onUpdate: (id: string, content: string) => void;
   onDelete: (id: string) => void;
-  onAddAfter: (type: ScriptLine["type"], afterId: string) => void;
+  onAddAfter: (labelId: string, afterId: string) => void;
   onCopied: (text: string) => void;
 };
 
@@ -56,7 +56,7 @@ export default function ScriptLineItem({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onAddAfter(line.type, line.id);
+      onAddAfter(line.labelId, line.id);
     }
   };
 

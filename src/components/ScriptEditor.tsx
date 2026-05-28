@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import ScriptLineItem from "@/components/ScriptLineItem";
-import type { EditorSettings, Scenario, ScriptLine } from "@/types/editor";
+import type { EditorSettings, Scenario } from "@/types/editor";
 
 type Props = {
   scenario: Scenario;
   settings: EditorSettings;
   onUpdateLine: (id: string, content: string) => void;
   onDeleteLine: (id: string) => void;
-  onAddLine: (type: ScriptLine["type"], afterId?: string) => void;
+  onAddLine: (labelId: string, afterId?: string) => void;
 };
 
 export default function ScriptEditor({
@@ -51,7 +51,7 @@ export default function ScriptEditor({
                   editorMode={editorMode}
                   onUpdate={onUpdateLine}
                   onDelete={onDeleteLine}
-                  onAddAfter={(type, afterId) => onAddLine(type, afterId)}
+                  onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
                   onCopied={setLastCopied}
                 />
               ))}
