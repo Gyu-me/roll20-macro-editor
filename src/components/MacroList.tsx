@@ -57,7 +57,7 @@ export default function MacroList({
   return (
     <aside className="macro-sidebar">
       <div className="sidebar-header">
-        <h1>Roll20 매크로 편집기</h1>
+        <h1>초보 GM 롤꾸할거임</h1>
         <p>나 편하자구 만든 TRPG GM용 매크로 </p>
       </div>
 
