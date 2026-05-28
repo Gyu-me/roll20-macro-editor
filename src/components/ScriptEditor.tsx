@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ScriptLineItem from "@/components/ScriptLineItem";
-import type { EditorSettings, Scenario } from "@/types/editor";
+import type { EditorSettings, Scenario, ScriptLine } from "@/types/editor";
 
 type Props = {
   scenario: Scenario;

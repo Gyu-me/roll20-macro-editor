@@ -1185,3 +1185,317 @@ textarea:focus {
   text-overflow: ellipsis;
   max-width: 500px;
 }
+
+/* 툴바 추가 버튼 색상 점 */
+.toolbar-add-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 4px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  position: relative;
+  top: -0.5px;
+}
+
+/* 태그 설정 버튼 */
+.toolbar-label-settings-btn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.toolbar-label-settings-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.toolbar-label-settings-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Label Manager — 태그 관리 모달
+   ═══════════════════════════════════════════════════════ */
+
+.lm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.lm-panel {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.lm-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.lm-close-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lm-close-btn:hover {
+  background: #f0f0f0;
+  color: var(--text);
+}
+
+.lm-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.lm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 20px;
+  transition: background 0.1s;
+}
+
+.lm-row:hover {
+  background: #fafafa;
+}
+
+.lm-color-dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.lm-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 64px;
+  letter-spacing: -0.02em;
+}
+
+.lm-row-command {
+  flex: 1;
+  font-size: 12px;
+  font-family: monospace;
+  color: #555;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lm-row-command-empty {
+  color: #ccc;
+  font-family: inherit;
+  font-style: italic;
+}
+
+.lm-default-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #888;
+  background: #f0f0f0;
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lm-exclude-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #E67E22;
+  background: #FFF5EC;
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lm-row-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.lm-move-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #fff;
+  font-size: 9px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.lm-move-btn:hover:not(:disabled) {
+  background: #f4f4f4;
+  color: var(--text);
+}
+
+.lm-move-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.lm-delete-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ffd0d0;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.lm-delete-btn:hover {
+  background: #ffe0e0;
+}
+
+.lm-add-section {
+  border-top: 1px solid var(--line);
+  padding: 14px 20px 18px;
+  flex-shrink: 0;
+  background: #fafafa;
+}
+
+.lm-add-title {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.lm-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lm-color-picker {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 3px;
+  background: #fff;
+}
+
+.lm-input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  background: #fff;
+  min-width: 0;
+}
+
+.lm-input:focus {
+  border-color: var(--primary);
+}
+
+.lm-input-name {
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.lm-input-command {
+  flex: 1;
+}
+
+.lm-add-btn {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lm-add-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.lm-add-btn:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+.lm-exclude-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.lm-exclude-check input {
+  width: auto;
+  height: auto;
+  margin: 0;
+  cursor: pointer;
+}
