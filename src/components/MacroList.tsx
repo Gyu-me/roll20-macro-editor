@@ -10,6 +10,7 @@ type MacroListProps = {
   templates: MacroTemplate[];
   selectedId: string;
   onSelect: (template: MacroTemplate) => void;
+  compact?: boolean;
 };
 
 function getTemplateThumbnailHtml(template: MacroTemplate): string {
@@ -30,6 +31,7 @@ export default function MacroList({
   templates,
   selectedId,
   onSelect,
+  compact,
 }: MacroListProps) {
   const [query, setQuery] = useState("");
 
@@ -55,11 +57,13 @@ export default function MacroList({
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
 
   return (
-    <aside className="macro-sidebar">
-      <div className="sidebar-header">
-        <h1>초보 GM 롤꾸할거임</h1>
-        <p>나 편하자구 만든 TRPG GM용 매크로 </p>
-      </div>
+    <aside className={compact ? "macro-sidebar compact-macro-sidebar" : "macro-sidebar"}>
+      {!compact && (
+        <div className="sidebar-header">
+          <h1>초보 GM 롤꾸할거임</h1>
+          <p>나 편하자구 만든 TRPG GM용 매크로 </p>
+        </div>
+      )}
 
       <div className="search-area">
         <label htmlFor="macro-search">기능 검색</label>
