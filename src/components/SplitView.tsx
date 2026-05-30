@@ -11,11 +11,6 @@ import { macroTemplates } from "@/data/macroTemplates";
 import type { AppState, EditorSettings, Scenario, ScenarioFolder } from "@/types/editor";
 import type { MacroTemplate } from "@/types/macro";
 
-const MIN_LIST = 140;
-const MAX_LIST = 320;
-const MIN_MACRO = 260;
-const MIN_SCRIPT = 280;
-
 type ScenarioSidebarProps = {
   scenarios: AppState["scenarios"];
   folders: ScenarioFolder[];
@@ -43,39 +38,6 @@ type Props = {
   onOpenLabelManager: () => void;
 };
 
-function DragHandle({ onDrag }: { onDrag: (dx: number) => void }) {
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    let lastX = e.clientX;
-
-    const move = (ev: MouseEvent) => {
-      const dx = ev.clientX - lastX;
-      lastX = ev.clientX;
-      onDrag(dx);
-    };
-
-    const up = () => {
-      document.removeEventListener("mousemove", move);
-      document.removeEventListener("mouseup", up);
-      document.body.style.cursor = "";
-      document.body.style.userSelect = "";
-    };
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-  };
-
-  return (
-    <div
-      className="panel-drag-handle"
-      onMouseDown={handleMouseDown}
-      title="드래그하여 크기 조절"
-    />
-  );
-}
-
 export default function SplitView({
   appState,
   selectedScenario,
@@ -89,8 +51,6 @@ export default function SplitView({
   onOpenLabelManager,
 }: Props) {
   const [selectedTemplate, setSelectedTemplate] = useState<MacroTemplate>(macroTemplates[0]);
-  const [listW, setListW] = useState(180);
-  const [macroW, setMacroW] = useState(360);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleAddToScript = (code: string) => {
@@ -99,11 +59,8 @@ export default function SplitView({
 
   return (
     <div className="split-view">
-      {/* Panel 1: 매크로 목록 */}
-      <div
-        className="split-panel split-macro-list"
-        style={{ width: listW, flexShrink: 0 }}
-      >
+      {/* Panel 1: 카테고리 목록 (고정 160px) */}
+      <div className="split-panel split-macro-list">
         <MacroList
           categories={macroCategories}
           templates={macroTemplates}
@@ -113,13 +70,8 @@ export default function SplitView({
         />
       </div>
 
-      <DragHandle onDrag={(dx) => setListW((w) => Math.max(MIN_LIST, Math.min(MAX_LIST, w + dx)))} />
-
-      {/* Panel 2: 매크로 편집/미리보기 */}
-      <div
-        className="split-panel split-macro-content"
-        style={{ width: macroW, flexShrink: 0 }}
-      >
+      {/* Panel 2: 매크로 편집 (고정 380px) */}
+      <div className="split-panel split-macro-content">
         <MacroEditorPanels
           key={selectedTemplate.id}
           selectedTemplate={selectedTemplate}
@@ -128,10 +80,8 @@ export default function SplitView({
         />
       </div>
 
-      <DragHandle onDrag={(dx) => setMacroW((w) => Math.max(MIN_MACRO, w + dx))} />
-
-      {/* Panel 3: 스크립트 편집 */}
-      <div className="split-panel split-script-panel" style={{ flex: 1, minWidth: MIN_SCRIPT }}>
+      {/* Panel 3: 스크립트 편집 (나머지 공간) */}
+      <div className="split-panel split-script-panel">
         <TopToolbar
           settings={appState.settings}
           lastSavedAt={appState.lastSavedAt}
