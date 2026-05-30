@@ -329,6 +329,24 @@ export default function AppShell() {
     [],
   );
 
+  const handleUpdateLabel = useCallback(
+    (id: string, patch: Partial<LabelSetting>) => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          settings: {
+            ...prev.settings,
+            labels: prev.settings.labels.map((l) =>
+              l.id === id ? { ...l, ...patch } : l,
+            ),
+          },
+        };
+      });
+    },
+    [],
+  );
+
   const handleDeleteLabel = useCallback((id: string) => {
     setAppState((prev) => {
       if (!prev) return prev;
@@ -522,6 +540,7 @@ export default function AppShell() {
           labels={appState.settings.labels}
           onClose={() => setIsLabelManagerOpen(false)}
           onAddLabel={handleAddLabel}
+          onUpdateLabel={handleUpdateLabel}
           onDeleteLabel={handleDeleteLabel}
           onMoveLabel={handleMoveLabel}
         />

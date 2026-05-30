@@ -1994,12 +1994,33 @@ details[open] .compact-edit-summary::before {
   background: #fafafa;
 }
 
-.lm-color-dot {
+/* 색상 편집 버튼 (색상 점) */
+.lm-color-dot-btn {
   flex-shrink: 0;
-  width: 10px;
-  height: 10px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1.5px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.lm-color-dot-btn:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px #ddd;
+}
+
+.lm-color-dot-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  padding: 0;
+  border: none;
 }
 
 .lm-row-name {
@@ -2106,14 +2127,26 @@ details[open] .compact-edit-summary::before {
 
 .lm-add-title {
   margin: 0 0 10px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--muted);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.lm-add-row {
+.lm-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lm-add-row1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lm-add-row2 {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2139,31 +2172,30 @@ details[open] .compact-edit-summary::before {
   outline: none;
   background: #fff;
   min-width: 0;
+  flex: 1;
 }
 
 .lm-input:focus {
   border-color: var(--primary);
 }
 
-.lm-input-name {
-  width: 110px;
-  flex-shrink: 0;
-}
-
 .lm-input-command {
+  font-family: "Consolas", "Fira Code", monospace;
+  font-size: 12px;
   flex: 1;
 }
 
 .lm-add-btn {
   flex-shrink: 0;
   height: 36px;
-  padding: 0 16px;
+  padding: 0 18px;
   border: none;
   border-radius: 8px;
   background: var(--primary);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
+  cursor: pointer;
 }
 
 .lm-add-btn:disabled {
