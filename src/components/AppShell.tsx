@@ -8,10 +8,16 @@ import { DEFAULT_LABELS } from "@/data/defaultLabels";
 import { getInitialState } from "@/data/initialState";
 
 function migrateState(state: AppState): AppState {
-  const existingIds = new Set(state.settings.labels.map((l) => l.id));
+  const defaultIds = new Set(DEFAULT_LABELS.map((d) => d.id));
 
-  // 기본 라벨의 command/roll20Style/excludeFromOutput을 최신 defaultLabels 기준으로 동기화
-  const syncedLabels = state.settings.labels.map((l) => {
+  // 구버전 기본 태그 제거 + 커스텀 태그 유지
+  const filtered = state.settings.labels.filter((l) => {
+    if (!l.isDefault) return true;
+    return defaultIds.has(l.id);
+  });
+
+  // 기본 라벨 속성을 최신 DEFAULT_LABELS 기준으로 동기화
+  const syncedLabels = filtered.map((l) => {
     if (!l.isDefault) return l;
     const def = DEFAULT_LABELS.find((d) => d.id === l.id);
     if (!def) return l;
@@ -20,13 +26,14 @@ function migrateState(state: AppState): AppState {
       command: def.command,
       roll20Style: def.roll20Style,
       excludeFromOutput: def.excludeFromOutput,
+      hideFromToolbar: def.hideFromToolbar,
     };
   });
 
-  // 새로 추가된 기본 라벨(raw 등) 누락 시 보충
-  const maxOrder = syncedLabels.reduce((m, l) => Math.max(m, l.order), 0);
+  // 누락된 기본 라벨 추가
+  const existingIds = new Set(syncedLabels.map((l) => l.id));
   const missing = DEFAULT_LABELS.filter((d) => !existingIds.has(d.id)).map(
-    (d, i) => ({ ...d, order: maxOrder + i + 1 }),
+    (d) => ({ ...d }),
   );
 
   return {
@@ -204,6 +211,65 @@ export default function AppShell() {
     });
   }, []);
 
+  const handleReorderScenario = useCallback(
+    (dragId: string, dropId: string, pos: "before" | "after" | "into") => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        const scenarios = [...prev.scenarios];
+        const dragIdx = scenarios.findIndex((s) => s.id === dragId);
+        if (dragIdx === -1) return prev;
+        const [dragged] = scenarios.splice(dragIdx, 1);
+
+        let newFolderId: string | null;
+        let folders = prev.folders;
+
+        if (pos === "into") {
+          // 폴더 위에 드랍 → 해당 폴더로 이동
+          newFolderId = dropId;
+          const updated = { ...dragged, folderId: newFolderId, updatedAt: Date.now() };
+          scenarios.push(updated);
+          folders = prev.folders.map((f) => {
+            if (f.id === newFolderId) return f.scenarioIds.includes(dragId) ? f : { ...f, scenarioIds: [...f.scenarioIds, dragId] };
+            return { ...f, scenarioIds: f.scenarioIds.filter((id) => id !== dragId) };
+          });
+        } else {
+          // 다른 시나리오 앞/뒤에 드랍
+          const target = scenarios.find((s) => s.id === dropId);
+          if (!target) return prev;
+          newFolderId = target.folderId;
+          const updated = { ...dragged, folderId: newFolderId, updatedAt: Date.now() };
+          const dropIdx = scenarios.findIndex((s) => s.id === dropId);
+          scenarios.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, updated);
+          if (dragged.folderId !== newFolderId) {
+            folders = prev.folders.map((f) => {
+              if (f.id === newFolderId) return f.scenarioIds.includes(dragId) ? f : { ...f, scenarioIds: [...f.scenarioIds, dragId] };
+              if (f.id === dragged.folderId) return { ...f, scenarioIds: f.scenarioIds.filter((id) => id !== dragId) };
+              return f;
+            });
+          }
+        }
+        return { ...prev, scenarios, folders };
+      });
+    },
+    [],
+  );
+
+  const handleReorderFolder = useCallback(
+    (dragId: string, dropId: string, pos: "before" | "after") => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        const folders = [...prev.folders];
+        const dragIdx = folders.findIndex((f) => f.id === dragId);
+        if (dragIdx === -1) return prev;
+        const [dragged] = folders.splice(dragIdx, 1);
+        const dropIdx = folders.findIndex((f) => f.id === dropId);
+        folders.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, dragged);
+        return { ...prev, folders };
+      });
+    },
+    [],
+  );
+
   // ── Line mutations ───────────────────────────────────────
 
   const patchScenarioLines = useCallback(
@@ -229,6 +295,20 @@ export default function AppShell() {
       patchScenarioLines((lines) =>
         lines.map((l) =>
           l.id === id ? { ...l, content, updatedAt: Date.now() } : l,
+        ),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleChangeLabelId = useCallback(
+    (id: string, labelId: string) => {
+      const type: ScriptLineType = KNOWN_TYPES.includes(labelId as ScriptLineType)
+        ? (labelId as ScriptLineType)
+        : "custom";
+      patchScenarioLines((lines) =>
+        lines.map((l) =>
+          l.id === id ? { ...l, labelId, type, updatedAt: Date.now() } : l,
         ),
       );
     },
@@ -302,6 +382,24 @@ export default function AppShell() {
         return {
           ...prev,
           settings: { ...prev.settings, labels: [...labels, newLabel] },
+        };
+      });
+    },
+    [],
+  );
+
+  const handleUpdateLabel = useCallback(
+    (id: string, patch: Partial<LabelSetting>) => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          settings: {
+            ...prev.settings,
+            labels: prev.settings.labels.map((l) =>
+              l.id === id ? { ...l, ...patch } : l,
+            ),
+          },
         };
       });
     },
@@ -428,7 +526,10 @@ export default function AppShell() {
     appState,
     selectedScenario,
     scenarioSidebarProps,
+    onReorderScenario: handleReorderScenario,
+    onReorderFolder: handleReorderFolder,
     onUpdateLine: handleUpdateLine,
+    onChangeLabelId: handleChangeLabelId,
     onDeleteLine: handleDeleteLine,
     onAddLine: handleAddLine,
     onUpdateSettings: handleUpdateSettings,
@@ -500,6 +601,7 @@ export default function AppShell() {
           labels={appState.settings.labels}
           onClose={() => setIsLabelManagerOpen(false)}
           onAddLabel={handleAddLabel}
+          onUpdateLabel={handleUpdateLabel}
           onDeleteLabel={handleDeleteLabel}
           onMoveLabel={handleMoveLabel}
         />

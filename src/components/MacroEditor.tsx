@@ -313,36 +313,169 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
 
   if (compact) {
     return (
-      <div className="compact-panels">
-        <div className="compact-panels-header">
-          <p className="category-label">{selectedTemplate.categoryId}</p>
-          <h3 className="compact-template-name">{selectedTemplate.name}</h3>
+      <div className="cp-wrap">
+        {/* ① 헤더 */}
+        <div className="cp-header">
+          <span className="cp-category">{selectedTemplate.categoryId}</span>
+          <span className="cp-name">{selectedTemplate.name}</span>
         </div>
 
-        <div className="compact-preview-wrap">
-          <span className="compact-preview-label">미리보기</span>
-          <div
-            className="compact-preview-box roll20-preview"
-            style={previewBoxStyle}
-            dangerouslySetInnerHTML={{
-              __html:
-                previewHtml ||
-                '<span style="color:#aaa;font-size:13px;">미리보기 없음</span>',
-            }}
-          />
+        <div className="cp-body">
+          {/* ② 스타일 선택 */}
+          {selectedTemplate.variants && selectedTemplate.variants.length > 0 && (
+            <div className="cp-section">
+              <p className="cp-section-label">스타일</p>
+              <div className="cp-variant-row">
+                {selectedTemplate.variants.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    className={`cp-variant-btn${selectedVariantId === v.id ? " is-active" : ""}`}
+                    onClick={() => handleVariantChange(v)}
+                  >
+                    {v.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ③ 내용 입력 (가장 중요) */}
+          {textFields.length > 0 && (
+            <div className="cp-section cp-section--primary">
+              <p className="cp-section-label">내용 입력</p>
+              {textFields.map((field) => (
+                <div key={field.key} className="cp-field-row">
+                  <label className="cp-field-label">{field.label}</label>
+                  <textarea
+                    className="cp-textarea"
+                    rows={2}
+                    value={fieldValues[field.key] ?? field.defaultValue}
+                    onChange={(e) => handleFieldChange(field.key, e.target.value)}
+                    placeholder={`${field.label} 입력...`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {textFields.length === 0 && colorFields.length === 0 && (
+            <div className="cp-section">
+              <p className="cp-no-fields">편집 가능한 필드가 없습니다.</p>
+            </div>
+          )}
+
+          {/* ④ 미리보기 */}
+          <div className="cp-section">
+            <p className="cp-section-label">미리보기</p>
+            <div
+              className="cp-preview-box roll20-preview"
+              style={previewBoxStyle}
+              dangerouslySetInnerHTML={{
+                __html:
+                  previewHtml ||
+                  '<span style="color:#aaa;font-size:12px;">미리보기 없음</span>',
+              }}
+            />
+          </div>
+
+          {/* ⑤ 스크립트에 추가 (CTA) */}
+          {onAddToScript && (
+            <div className="cp-cta-wrap">
+              <button
+                type="button"
+                className="cp-add-btn"
+                onClick={handleAddToScript}
+              >
+                + 스크립트에 추가
+              </button>
+              <button
+                type="button"
+                className="cp-copy-btn"
+                onClick={handleCopyFinalCode}
+                title="클립보드에 코드 복사"
+              >
+                복사
+              </button>
+            </div>
+          )}
+          {copyMessage && <p className="cp-copy-msg">{copyMessage}</p>}
+
+          {/* ⑥ 색상 설정 (보조) */}
+          {(selectedTemplate.colorPresets?.length || colorFields.length > 0) && (
+            <details className="cp-details">
+              <summary className="cp-details-summary">색상 설정</summary>
+              <div className="cp-details-body">
+                {selectedTemplate.colorPresets && selectedTemplate.colorPresets.length > 0 && (
+                  <div className="cp-preset-row">
+                    {selectedTemplate.colorPresets.map((preset) => {
+                      const firstColor = Object.values(preset.values)[0] ?? "#333";
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          className="preset-btn"
+                          style={{ background: firstColor }}
+                          onClick={() => handlePresetSelect(preset)}
+                          title={preset.name}
+                        >
+                          {preset.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {colorFields.map((field) => (
+                  <ColorFieldInput
+                    key={field.key}
+                    field={field}
+                    value={fieldValues[field.key] ?? field.defaultValue}
+                    onChange={(v) => handleFieldChange(field.key, v)}
+                    customPalette={customPalette}
+                    onSaveColor={saveColor}
+                    onRemoveColor={removeColor}
+                  />
+                ))}
+              </div>
+            </details>
+          )}
+
+          {/* ⑦ 코드 직접 편집 (보조) */}
+          <details className="cp-details">
+            <summary className="cp-details-summary">코드 직접 편집</summary>
+            <div className="cp-details-body">
+              <textarea
+                className="cp-code-textarea"
+                value={finalCode}
+                onChange={(e) => setCodeOverride(e.target.value)}
+                aria-label="Roll20 코드 직접 편집"
+              />
+              {codeOverride !== null && (
+                <button
+                  type="button"
+                  className="reset-code-button"
+                  onClick={() => setCodeOverride(null)}
+                >
+                  자동 생성으로 되돌리기
+                </button>
+              )}
+            </div>
+          </details>
+
+          {/* ⑧ 메모 */}
+          <details className="cp-details">
+            <summary className="cp-details-summary">메모</summary>
+            <div className="cp-details-body">
+              <textarea
+                className="cp-textarea"
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="이 템플릿에 대한 메모..."
+                rows={3}
+              />
+            </div>
+          </details>
         </div>
-
-        {finalCodeSection}
-
-        <textarea
-          className="top-bar-memo compact-memo"
-          value={memo}
-          onChange={(e) => setMemo(e.target.value)}
-          placeholder="메모..."
-          aria-label="메모"
-        />
-
-        {editFields}
       </div>
     );
   }
