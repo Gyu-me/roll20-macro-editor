@@ -35,6 +35,7 @@ type Props = {
   selectedScenario: Scenario;
   scenarioSidebarProps: ScenarioSidebarProps;
   onUpdateLine: (id: string, content: string) => void;
+  onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
   onUpdateSettings: (patch: Partial<EditorSettings>) => void;
@@ -80,6 +81,7 @@ export default function SplitView({
   selectedScenario,
   scenarioSidebarProps,
   onUpdateLine,
+  onChangeLabelId,
   onDeleteLine,
   onAddLine,
   onUpdateSettings,
@@ -154,6 +156,7 @@ export default function SplitView({
             scenario={selectedScenario}
             settings={appState.settings}
             onUpdateLine={onUpdateLine}
+            onChangeLabelId={onChangeLabelId}
             onDeleteLine={onDeleteLine}
             onAddLine={onAddLine}
           />

@@ -50,6 +50,7 @@ export type LabelSetting = {
   order: number;
   excludeFromOutput?: boolean;
   isDefault?: boolean;
+  hideFromToolbar?: boolean;
 };
 
 export type EditorSettings = {

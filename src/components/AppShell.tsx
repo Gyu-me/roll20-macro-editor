@@ -8,10 +8,16 @@ import { DEFAULT_LABELS } from "@/data/defaultLabels";
 import { getInitialState } from "@/data/initialState";
 
 function migrateState(state: AppState): AppState {
-  const existingIds = new Set(state.settings.labels.map((l) => l.id));
+  const defaultIds = new Set(DEFAULT_LABELS.map((d) => d.id));
 
-  // 기본 라벨의 command/roll20Style/excludeFromOutput을 최신 defaultLabels 기준으로 동기화
-  const syncedLabels = state.settings.labels.map((l) => {
+  // 구버전 기본 태그 제거 + 커스텀 태그 유지
+  const filtered = state.settings.labels.filter((l) => {
+    if (!l.isDefault) return true;
+    return defaultIds.has(l.id);
+  });
+
+  // 기본 라벨 속성을 최신 DEFAULT_LABELS 기준으로 동기화
+  const syncedLabels = filtered.map((l) => {
     if (!l.isDefault) return l;
     const def = DEFAULT_LABELS.find((d) => d.id === l.id);
     if (!def) return l;
@@ -20,13 +26,14 @@ function migrateState(state: AppState): AppState {
       command: def.command,
       roll20Style: def.roll20Style,
       excludeFromOutput: def.excludeFromOutput,
+      hideFromToolbar: def.hideFromToolbar,
     };
   });
 
-  // 새로 추가된 기본 라벨(raw 등) 누락 시 보충
-  const maxOrder = syncedLabels.reduce((m, l) => Math.max(m, l.order), 0);
+  // 누락된 기본 라벨 추가
+  const existingIds = new Set(syncedLabels.map((l) => l.id));
   const missing = DEFAULT_LABELS.filter((d) => !existingIds.has(d.id)).map(
-    (d, i) => ({ ...d, order: maxOrder + i + 1 }),
+    (d) => ({ ...d }),
   );
 
   return {
@@ -235,6 +242,20 @@ export default function AppShell() {
     [patchScenarioLines],
   );
 
+  const handleChangeLabelId = useCallback(
+    (id: string, labelId: string) => {
+      const type: ScriptLineType = KNOWN_TYPES.includes(labelId as ScriptLineType)
+        ? (labelId as ScriptLineType)
+        : "custom";
+      patchScenarioLines((lines) =>
+        lines.map((l) =>
+          l.id === id ? { ...l, labelId, type, updatedAt: Date.now() } : l,
+        ),
+      );
+    },
+    [patchScenarioLines],
+  );
+
   const handleDeleteLine = useCallback(
     (id: string) => {
       patchScenarioLines((lines) => lines.filter((l) => l.id !== id));
@@ -429,6 +450,7 @@ export default function AppShell() {
     selectedScenario,
     scenarioSidebarProps,
     onUpdateLine: handleUpdateLine,
+    onChangeLabelId: handleChangeLabelId,
     onDeleteLine: handleDeleteLine,
     onAddLine: handleAddLine,
     onUpdateSettings: handleUpdateSettings,

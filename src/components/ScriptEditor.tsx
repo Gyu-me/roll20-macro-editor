@@ -8,6 +8,7 @@ type Props = {
   scenario: Scenario;
   settings: EditorSettings;
   onUpdateLine: (id: string, content: string) => void;
+  onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
 };
@@ -16,6 +17,7 @@ export default function ScriptEditor({
   scenario,
   settings,
   onUpdateLine,
+  onChangeLabelId,
   onDeleteLine,
   onAddLine,
 }: Props) {
@@ -47,9 +49,11 @@ export default function ScriptEditor({
                   key={line.id}
                   line={line}
                   label={getLabelForLine(line)}
+                  labels={labels}
                   platformMode={platformMode}
                   editorMode={editorMode}
                   onUpdate={onUpdateLine}
+                  onChangeLabel={onChangeLabelId}
                   onDelete={onDeleteLine}
                   onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
                   onCopied={setLastCopied}
