@@ -775,95 +775,104 @@ textarea:focus {
 .script-toolbar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
   flex-shrink: 0;
   flex-wrap: wrap;
 }
 
-.toolbar-group {
+.toolbar-tags {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 
-.toolbar-sep {
-  width: 1px;
-  height: 18px;
-  background: var(--line);
-  margin: 0 2px;
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
 }
 
-.toolbar-label {
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  padding-right: 2px;
+.toolbar-save-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.toolbar-add-btn {
-  height: 28px;
-  padding: 0 10px;
+.toolbar-tag-btn {
+  height: 30px;
+  padding: 0 11px 0 8px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: 8px;
   background: #fff;
   font-size: 12px;
   font-weight: 600;
   color: var(--text);
   white-space: nowrap;
   letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
 }
 
-.toolbar-add-btn:hover:not(:disabled) {
-  background: #f4f4f4;
-  border-color: #bbb;
+.toolbar-tag-btn:hover:not(:disabled) {
+  border-color: var(--tag-color, #ccc);
+  background: #f7f7f7;
 }
 
-.toolbar-add-btn:disabled {
-  opacity: 0.4;
+.toolbar-tag-btn:disabled {
+  opacity: 0.38;
   cursor: default;
 }
 
-.toolbar-platform-btn {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 7px;
+.toolbar-tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.toolbar-add-custom-btn {
+  height: 30px;
+  padding: 0 11px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background: transparent;
   font-size: 12px;
-  font-weight: 700;
-  border: 1.5px solid;
-  white-space: nowrap;
-  letter-spacing: -0.02em;
+  color: var(--muted);
   cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.12s, color 0.12s;
 }
 
-.toolbar-platform-btn.roll20 {
-  border-color: #253BFE;
-  color: #253BFE;
-  background: #EEF0FF;
+.toolbar-add-custom-btn:hover:not(:disabled) {
+  border-color: #999;
+  color: var(--text);
 }
 
-.toolbar-platform-btn.ccfolia {
-  border-color: #31A749;
-  color: #31A749;
-  background: #EEF8EF;
+.toolbar-add-custom-btn:disabled {
+  opacity: 0.38;
+  cursor: default;
 }
 
 .toolbar-mode-btn {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 7px;
+  height: 30px;
+  padding: 0 13px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   border: 1.5px solid;
   white-space: nowrap;
   letter-spacing: -0.02em;
   cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
 .toolbar-mode-btn.editing {
@@ -879,16 +888,17 @@ textarea:focus {
 }
 
 .toolbar-save-btn {
-  height: 28px;
-  padding: 0 14px;
+  height: 30px;
+  padding: 0 16px;
   border: 1.5px solid var(--primary);
-  border-radius: 7px;
+  border-radius: 8px;
   background: var(--primary);
   color: #fff;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
+  transition: opacity 0.12s;
 }
 
 .toolbar-save-btn:hover {
@@ -987,6 +997,7 @@ textarea:focus {
   padding-top: 9px;
   display: flex;
   justify-content: flex-end;
+  position: relative;
 }
 
 .line-label-badge {
@@ -997,6 +1008,76 @@ textarea:focus {
   font-weight: 700;
   white-space: nowrap;
   letter-spacing: -0.01em;
+}
+
+/* 편집 모드 태그 변경 버튼 */
+.line-label-badge--btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 5px 2px 7px;
+  transition: opacity 0.1s;
+}
+
+.line-label-badge--btn:hover {
+  opacity: 0.75;
+}
+
+.line-label-caret {
+  font-size: 8px;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+/* 태그 선택 드롭다운 */
+.line-label-dropdown {
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  padding: 4px;
+  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.line-label-option {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  width: 100%;
+  transition: background 0.1s;
+}
+
+.line-label-option:hover {
+  background: #f4f4f4;
+}
+
+.line-label-option.is-active {
+  background: #f0f0f0;
+}
+
+.line-label-option-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .line-content-wrap {
@@ -1186,19 +1267,6 @@ textarea:focus {
   max-width: 500px;
 }
 
-/* 툴바 추가 버튼 색상 점 */
-.toolbar-add-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  margin-right: 4px;
-  flex-shrink: 0;
-  vertical-align: middle;
-  position: relative;
-  top: -0.5px;
-}
-
 /* 코드(raw) 라인 스타일 */
 .type-raw .line-textarea {
   font-family: "Consolas", "Fira Code", monospace;
@@ -1217,30 +1285,6 @@ textarea:focus {
   color: #1a2ecc;
   white-space: pre-wrap;
   word-break: break-all;
-}
-
-/* 태그 설정 버튼 */
-.toolbar-label-settings-btn {
-  height: 28px;
-  padding: 0 10px;
-  border: 1px dashed var(--line);
-  border-radius: 7px;
-  background: none;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-  letter-spacing: -0.02em;
-}
-
-.toolbar-label-settings-btn:hover:not(:disabled) {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.toolbar-label-settings-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
 }
 
 /* ═══════════════════════════════════════════════════════
