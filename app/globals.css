@@ -794,6 +794,50 @@ textarea:focus {
   flex-wrap: wrap;
 }
 
+/* 시나리오 선택 버튼 */
+.toolbar-scenario-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  flex-shrink: 0;
+  max-width: 180px;
+  transition: border-color 0.1s, background 0.1s;
+}
+
+.toolbar-scenario-btn:hover {
+  border-color: #999;
+  background: #f7f7f7;
+}
+
+.toolbar-scenario-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.toolbar-scenario-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--line);
+  flex-shrink: 0;
+}
+
 .toolbar-actions {
   display: flex;
   align-items: center;
@@ -954,9 +998,53 @@ textarea:focus {
   letter-spacing: -0.04em;
 }
 
+.scenario-title--editable {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: -6px;
+  transition: background 0.12s;
+}
+
+.scenario-title--editable:hover {
+  background: #f2f2f2;
+}
+
+.scenario-title-edit-hint {
+  font-size: 12px;
+  color: #ccc;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.scenario-title--editable:hover .scenario-title-edit-hint {
+  opacity: 1;
+}
+
+.scenario-title-input {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  border: none;
+  border-bottom: 2px solid var(--primary);
+  outline: none;
+  background: transparent;
+  padding: 2px 2px 1px;
+  min-width: 120px;
+  width: 100%;
+  max-width: 480px;
+  color: var(--text);
+  font-family: inherit;
+}
+
 .scenario-line-count {
   font-size: 12px;
   color: var(--muted);
+  flex-shrink: 0;
 }
 
 .script-lines {
@@ -1687,6 +1775,7 @@ textarea:focus {
 .split-script-panel {
   flex: 1;
   min-width: 320px;
+  position: relative;
 }
 
 /* 스크립트 영역 레이아웃 */
@@ -2095,6 +2184,340 @@ details[open] > .cp-details-summary::before {
 .add-to-script-button:hover {
   background: #253BFE;
   color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Scenario Panel — 시나리오 관리 오버레이
+   ═══════════════════════════════════════════════════════ */
+
+.sp-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.sp-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: #fff;
+  border-right: 1px solid var(--line);
+  box-shadow: 6px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  background: var(--panel);
+  gap: 8px;
+}
+
+.sp-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.sp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.sp-header-btn {
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+
+.sp-header-btn:hover {
+  background: #f4f4f4;
+}
+
+.sp-header-btn--primary {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #EEF0FF;
+}
+
+.sp-header-btn--primary:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.sp-close-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sp-close-btn:hover {
+  background: #f0f0f0;
+  color: var(--text);
+}
+
+.sp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0 16px;
+}
+
+/* ── 시나리오 아이템 ─────────────────────────────────── */
+
+.sp-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transition: background 0.08s;
+}
+
+.sp-item:hover {
+  background: #f7f7f7;
+}
+
+.sp-item.is-selected {
+  background: #EEF0FF;
+}
+
+.sp-item.is-dragging {
+  opacity: 0.35;
+}
+
+.sp-item.sp-drop-before {
+  border-top-color: var(--primary);
+}
+
+.sp-item.sp-drop-after {
+  border-bottom-color: var(--primary);
+}
+
+.sp-drag-handle {
+  font-size: 15px;
+  color: #d0d0d0;
+  cursor: grab;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+  user-select: none;
+  line-height: 1;
+}
+
+.sp-drag-handle:hover {
+  color: #aaa;
+}
+
+.sp-item-name-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+.sp-item-name-btn:hover {
+  background: #ececec;
+}
+
+.sp-item.is-selected .sp-item-name-btn {
+  color: #253BFE;
+  font-weight: 600;
+}
+
+.sp-item-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.sp-item-count {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.sp-item-actions {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.sp-action-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  font-size: 12px;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.1s, color 0.1s;
+}
+
+.sp-action-btn:hover {
+  background: #e8e8e8;
+  color: var(--text);
+}
+
+.sp-delete-btn:hover {
+  background: #ffe0e0 !important;
+  color: #c0392b !important;
+}
+
+.sp-rename-input {
+  flex: 1;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+  background: #fff;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* ── 폴더 ────────────────────────────────────────────── */
+
+.sp-folder {
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+}
+
+.sp-folder.sp-drop-before {
+  border-top-color: var(--primary);
+}
+
+.sp-folder.sp-drop-after {
+  border-bottom-color: var(--primary);
+}
+
+.sp-folder.sp-drop-into > .sp-folder-header {
+  background: #EEF0FF;
+  border-radius: 6px;
+  margin: 0 4px;
+}
+
+.sp-folder.is-dragging {
+  opacity: 0.35;
+}
+
+.sp-folder-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  cursor: default;
+}
+
+.sp-folder-toggle {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 4px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+.sp-folder-toggle:hover {
+  background: #f0f0f0;
+}
+
+.sp-folder-chevron {
+  font-size: 8px;
+  color: var(--muted);
+  flex-shrink: 0;
+  width: 10px;
+}
+
+.sp-folder-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sp-folder-count {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 1px 6px;
+}
+
+.sp-folder-contents {
+  border-left: 2px solid var(--line);
+  margin-left: 22px;
+  padding-left: 2px;
+}
+
+.sp-folder-empty {
+  padding: 4px 10px;
+  font-size: 11px;
+  color: #ccc;
+  font-style: italic;
+}
+
+.sp-empty {
+  padding: 32px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
 }
 
 /* ═══════════════════════════════════════════════════════

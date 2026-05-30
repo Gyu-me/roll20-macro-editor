@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ScriptLineItem from "@/components/ScriptLineItem";
 import type { EditorSettings, Scenario, ScriptLine } from "@/types/editor";
 
@@ -11,6 +11,7 @@ type Props = {
   onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
+  onRenameScenario: (id: string, name: string) => void;
 };
 
 export default function ScriptEditor({
@@ -20,9 +21,34 @@ export default function ScriptEditor({
   onChangeLabelId,
   onDeleteLine,
   onAddLine,
+  onRenameScenario,
 }: Props) {
   const [lastCopied, setLastCopied] = useState<string | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(scenario.title);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
   const { labels, platformMode, editorMode } = settings;
+
+  // 시나리오가 바뀌면 draft 초기화
+  useEffect(() => {
+    setTitleDraft(scenario.title);
+    setIsEditingTitle(false);
+  }, [scenario.id, scenario.title]);
+
+  useEffect(() => {
+    if (isEditingTitle) titleInputRef.current?.select();
+  }, [isEditingTitle]);
+
+  const commitTitle = () => {
+    const trimmed = titleDraft.trim();
+    if (trimmed && trimmed !== scenario.title) {
+      onRenameScenario(scenario.id, trimmed);
+    } else {
+      setTitleDraft(scenario.title);
+    }
+    setIsEditingTitle(false);
+  };
 
   const getLabelForLine = (line: ScriptLine) =>
     labels.find((l) => l.id === line.labelId) ?? labels[0];
@@ -32,7 +58,31 @@ export default function ScriptEditor({
       <div className="script-editor">
         <div className="script-editor-inner">
           <div className="scenario-header">
-            <h2 className="scenario-title">{scenario.title}</h2>
+            {isEditingTitle ? (
+              <input
+                ref={titleInputRef}
+                className="scenario-title-input"
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={commitTitle}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") commitTitle();
+                  if (e.key === "Escape") {
+                    setTitleDraft(scenario.title);
+                    setIsEditingTitle(false);
+                  }
+                }}
+              />
+            ) : (
+              <h2
+                className="scenario-title scenario-title--editable"
+                onClick={() => setIsEditingTitle(true)}
+                title="클릭하여 이름 변경"
+              >
+                {scenario.title}
+                <span className="scenario-title-edit-hint">✏</span>
+              </h2>
+            )}
             <span className="scenario-line-count">
               {scenario.lines.length}개 라인
             </span>

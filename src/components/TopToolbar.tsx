@@ -5,6 +5,8 @@ import type { EditorSettings } from "@/types/editor";
 type Props = {
   settings: EditorSettings;
   lastSavedAt: number | null;
+  currentScenarioTitle: string;
+  onOpenScenarioPanel: () => void;
   onUpdateSettings: (patch: Partial<EditorSettings>) => void;
   onAddLine: (labelId: string) => void;
   onOpenLabelManager: () => void;
@@ -21,6 +23,8 @@ function formatTime(ts: number): string {
 export default function TopToolbar({
   settings,
   lastSavedAt,
+  currentScenarioTitle,
+  onOpenScenarioPanel,
   onUpdateSettings,
   onAddLine,
   onOpenLabelManager,
@@ -34,6 +38,20 @@ export default function TopToolbar({
 
   return (
     <div className="script-toolbar">
+      {/* 시나리오 선택 버튼 */}
+      <button
+        type="button"
+        className="toolbar-scenario-btn"
+        onClick={onOpenScenarioPanel}
+        title="시나리오 목록 열기"
+      >
+        <span className="toolbar-scenario-icon">▤</span>
+        <span className="toolbar-scenario-title">{currentScenarioTitle}</span>
+      </button>
+
+      <div className="toolbar-sep" />
+
+      {/* 태그 추가 버튼들 */}
       <div className="toolbar-tags">
         {visibleLabels.map((label) => (
           <button
@@ -60,6 +78,7 @@ export default function TopToolbar({
         </button>
       </div>
 
+      {/* 오른쪽 액션 */}
       <div className="toolbar-actions">
         <button
           type="button"

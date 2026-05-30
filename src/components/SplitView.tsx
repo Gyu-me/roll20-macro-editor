@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { MacroEditorPanels } from "@/components/MacroEditor";
 import MacroList from "@/components/MacroList";
-import ScenarioSidebar from "@/components/ScenarioSidebar";
+import ScenarioPanel from "@/components/ScenarioPanel";
 import ScriptEditor from "@/components/ScriptEditor";
 import TopToolbar from "@/components/TopToolbar";
 import { macroCategories } from "@/data/macroCategories";
@@ -29,6 +29,8 @@ type Props = {
   appState: AppState;
   selectedScenario: Scenario;
   scenarioSidebarProps: ScenarioSidebarProps;
+  onReorderScenario: (dragId: string, dropId: string, pos: "before" | "after" | "into") => void;
+  onReorderFolder: (dragId: string, dropId: string, pos: "before" | "after") => void;
   onUpdateLine: (id: string, content: string) => void;
   onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
@@ -42,6 +44,8 @@ export default function SplitView({
   appState,
   selectedScenario,
   scenarioSidebarProps,
+  onReorderScenario,
+  onReorderFolder,
   onUpdateLine,
   onChangeLabelId,
   onDeleteLine,
@@ -51,7 +55,7 @@ export default function SplitView({
   onOpenLabelManager,
 }: Props) {
   const [selectedTemplate, setSelectedTemplate] = useState<MacroTemplate>(macroTemplates[0]);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [scenarioPanelOpen, setScenarioPanelOpen] = useState(false);
 
   const handleAddToScript = (code: string) => {
     onAddLine("raw", undefined, code);
@@ -80,28 +84,20 @@ export default function SplitView({
         />
       </div>
 
-      {/* Panel 3: 스크립트 편집 (나머지 공간) */}
+      {/* Panel 3: 스크립트 편집 (나머지) */}
       <div className="split-panel split-script-panel">
         <TopToolbar
           settings={appState.settings}
           lastSavedAt={appState.lastSavedAt}
+          currentScenarioTitle={selectedScenario.title}
+          onOpenScenarioPanel={() => setScenarioPanelOpen(true)}
           onUpdateSettings={onUpdateSettings}
           onAddLine={onAddLine}
           onOpenLabelManager={onOpenLabelManager}
           onSave={onSave}
         />
+
         <div className="split-script-body">
-          {!sidebarCollapsed && (
-            <ScenarioSidebar {...scenarioSidebarProps} />
-          )}
-          <button
-            type="button"
-            className={`sidebar-collapse-btn${sidebarCollapsed ? " is-collapsed" : ""}`}
-            onClick={() => setSidebarCollapsed((v) => !v)}
-            title={sidebarCollapsed ? "시나리오 목록 펼치기" : "시나리오 목록 접기"}
-          >
-            {sidebarCollapsed ? "▶" : "◀"}
-          </button>
           <ScriptEditor
             scenario={selectedScenario}
             settings={appState.settings}
@@ -109,8 +105,28 @@ export default function SplitView({
             onChangeLabelId={onChangeLabelId}
             onDeleteLine={onDeleteLine}
             onAddLine={onAddLine}
+            onRenameScenario={scenarioSidebarProps.onRename}
           />
         </div>
+
+        {/* 시나리오 패널 오버레이 */}
+        {scenarioPanelOpen && (
+          <ScenarioPanel
+            scenarios={scenarioSidebarProps.scenarios}
+            folders={scenarioSidebarProps.folders}
+            selectedId={scenarioSidebarProps.selectedId}
+            onClose={() => setScenarioPanelOpen(false)}
+            onSelect={scenarioSidebarProps.onSelect}
+            onCreate={scenarioSidebarProps.onCreate}
+            onRename={scenarioSidebarProps.onRename}
+            onDelete={scenarioSidebarProps.onDelete}
+            onCreateFolder={scenarioSidebarProps.onCreateFolder}
+            onRenameFolder={scenarioSidebarProps.onRenameFolder}
+            onDeleteFolder={scenarioSidebarProps.onDeleteFolder}
+            onReorderScenario={onReorderScenario}
+            onReorderFolder={onReorderFolder}
+          />
+        )}
       </div>
     </div>
   );

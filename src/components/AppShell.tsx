@@ -211,6 +211,65 @@ export default function AppShell() {
     });
   }, []);
 
+  const handleReorderScenario = useCallback(
+    (dragId: string, dropId: string, pos: "before" | "after" | "into") => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        const scenarios = [...prev.scenarios];
+        const dragIdx = scenarios.findIndex((s) => s.id === dragId);
+        if (dragIdx === -1) return prev;
+        const [dragged] = scenarios.splice(dragIdx, 1);
+
+        let newFolderId: string | null;
+        let folders = prev.folders;
+
+        if (pos === "into") {
+          // 폴더 위에 드랍 → 해당 폴더로 이동
+          newFolderId = dropId;
+          const updated = { ...dragged, folderId: newFolderId, updatedAt: Date.now() };
+          scenarios.push(updated);
+          folders = prev.folders.map((f) => {
+            if (f.id === newFolderId) return f.scenarioIds.includes(dragId) ? f : { ...f, scenarioIds: [...f.scenarioIds, dragId] };
+            return { ...f, scenarioIds: f.scenarioIds.filter((id) => id !== dragId) };
+          });
+        } else {
+          // 다른 시나리오 앞/뒤에 드랍
+          const target = scenarios.find((s) => s.id === dropId);
+          if (!target) return prev;
+          newFolderId = target.folderId;
+          const updated = { ...dragged, folderId: newFolderId, updatedAt: Date.now() };
+          const dropIdx = scenarios.findIndex((s) => s.id === dropId);
+          scenarios.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, updated);
+          if (dragged.folderId !== newFolderId) {
+            folders = prev.folders.map((f) => {
+              if (f.id === newFolderId) return f.scenarioIds.includes(dragId) ? f : { ...f, scenarioIds: [...f.scenarioIds, dragId] };
+              if (f.id === dragged.folderId) return { ...f, scenarioIds: f.scenarioIds.filter((id) => id !== dragId) };
+              return f;
+            });
+          }
+        }
+        return { ...prev, scenarios, folders };
+      });
+    },
+    [],
+  );
+
+  const handleReorderFolder = useCallback(
+    (dragId: string, dropId: string, pos: "before" | "after") => {
+      setAppState((prev) => {
+        if (!prev) return prev;
+        const folders = [...prev.folders];
+        const dragIdx = folders.findIndex((f) => f.id === dragId);
+        if (dragIdx === -1) return prev;
+        const [dragged] = folders.splice(dragIdx, 1);
+        const dropIdx = folders.findIndex((f) => f.id === dropId);
+        folders.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, dragged);
+        return { ...prev, folders };
+      });
+    },
+    [],
+  );
+
   // ── Line mutations ───────────────────────────────────────
 
   const patchScenarioLines = useCallback(
@@ -467,6 +526,8 @@ export default function AppShell() {
     appState,
     selectedScenario,
     scenarioSidebarProps,
+    onReorderScenario: handleReorderScenario,
+    onReorderFolder: handleReorderFolder,
     onUpdateLine: handleUpdateLine,
     onChangeLabelId: handleChangeLabelId,
     onDeleteLine: handleDeleteLine,
