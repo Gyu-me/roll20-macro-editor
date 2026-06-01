@@ -1,8 +1,34 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import BranchBlock from "@/components/BranchBlock";
 import ScriptLineItem from "@/components/ScriptLineItem";
-import type { EditorSettings, Scenario, ScriptLine } from "@/types/editor";
+import type {
+  BranchBlock as BranchBlockType,
+  BranchOption,
+  EditorSettings,
+  Scenario,
+  ScriptLine,
+} from "@/types/editor";
+
+type BranchHandlers = {
+  onAddBranch: (afterId?: string) => void;
+  onUpdateBranch: (id: string, patch: Partial<Pick<BranchBlockType, "title" | "description">>) => void;
+  onDeleteBranch: (id: string) => void;
+  onAddBranchOption: (branchId: string) => void;
+  onUpdateBranchOption: (
+    branchId: string,
+    optionId: string,
+    patch: Partial<Pick<BranchOption, "title" | "description" | "condition" | "collapsed">>,
+  ) => void;
+  onDeleteBranchOption: (branchId: string, optionId: string) => void;
+  onReorderBranchOption: (branchId: string, dragId: string, dropId: string, pos: "before" | "after") => void;
+  onSelectBranchOption: (branchId: string, optionId: string | null) => void;
+  onAddLineToOption: (branchId: string, optionId: string, labelId: string, afterId?: string) => void;
+  onUpdateLineInOption: (branchId: string, optionId: string, lineId: string, content: string) => void;
+  onDeleteLineInOption: (branchId: string, optionId: string, lineId: string) => void;
+  onChangeLabelInOption: (branchId: string, optionId: string, lineId: string, labelId: string) => void;
+};
 
 type Props = {
   scenario: Scenario;
@@ -12,7 +38,7 @@ type Props = {
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
   onRenameScenario: (id: string, name: string) => void;
-};
+} & BranchHandlers;
 
 export default function ScriptEditor({
   scenario,
@@ -22,6 +48,18 @@ export default function ScriptEditor({
   onDeleteLine,
   onAddLine,
   onRenameScenario,
+  onAddBranch,
+  onUpdateBranch,
+  onDeleteBranch,
+  onAddBranchOption,
+  onUpdateBranchOption,
+  onDeleteBranchOption,
+  onReorderBranchOption,
+  onSelectBranchOption,
+  onAddLineToOption,
+  onUpdateLineInOption,
+  onDeleteLineInOption,
+  onChangeLabelInOption,
 }: Props) {
   const [lastCopied, setLastCopied] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -30,7 +68,6 @@ export default function ScriptEditor({
 
   const { labels, platformMode, editorMode } = settings;
 
-  // 시나리오가 바뀌면 draft 초기화
   useEffect(() => {
     setTitleDraft(scenario.title);
     setIsEditingTitle(false);
@@ -52,6 +89,8 @@ export default function ScriptEditor({
 
   const getLabelForLine = (line: ScriptLine) =>
     labels.find((l) => l.id === line.labelId) ?? labels[0];
+
+  const nodeCount = scenario.lines.length;
 
   return (
     <div className="script-editor-wrap">
@@ -84,31 +123,56 @@ export default function ScriptEditor({
               </h2>
             )}
             <span className="scenario-line-count">
-              {scenario.lines.length}개 라인
+              {nodeCount}개 항목
             </span>
           </div>
 
           {scenario.lines.length === 0 ? (
             <p className="empty-scenario-hint">
-              아직 라인이 없어요. 상단 버튼으로 추가해보세요.
+              아직 항목이 없어요. 상단 버튼으로 추가해보세요.
             </p>
           ) : (
             <div className="script-lines">
-              {scenario.lines.map((line) => (
-                <ScriptLineItem
-                  key={line.id}
-                  line={line}
-                  label={getLabelForLine(line)}
-                  labels={labels}
-                  platformMode={platformMode}
-                  editorMode={editorMode}
-                  onUpdate={onUpdateLine}
-                  onChangeLabel={onChangeLabelId}
-                  onDelete={onDeleteLine}
-                  onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
-                  onCopied={setLastCopied}
-                />
-              ))}
+              {scenario.lines.map((node) => {
+                if (node.type === "branch") {
+                  return (
+                    <BranchBlock
+                      key={node.id}
+                      branch={node}
+                      labels={labels}
+                      platformMode={platformMode}
+                      editorMode={editorMode}
+                      onUpdate={onUpdateBranch}
+                      onDelete={onDeleteBranch}
+                      onAddOption={onAddBranchOption}
+                      onUpdateOption={onUpdateBranchOption}
+                      onDeleteOption={onDeleteBranchOption}
+                      onReorderOption={onReorderBranchOption}
+                      onSelectOption={onSelectBranchOption}
+                      onAddLineToOption={onAddLineToOption}
+                      onUpdateLineInOption={onUpdateLineInOption}
+                      onDeleteLineInOption={onDeleteLineInOption}
+                      onChangeLabelInOption={onChangeLabelInOption}
+                      onCopied={setLastCopied}
+                    />
+                  );
+                }
+                return (
+                  <ScriptLineItem
+                    key={node.id}
+                    line={node}
+                    label={getLabelForLine(node)}
+                    labels={labels}
+                    platformMode={platformMode}
+                    editorMode={editorMode}
+                    onUpdate={onUpdateLine}
+                    onChangeLabel={onChangeLabelId}
+                    onDelete={onDeleteLine}
+                    onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
+                    onCopied={setLastCopied}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

@@ -8,7 +8,14 @@ import ScriptEditor from "@/components/ScriptEditor";
 import TopToolbar from "@/components/TopToolbar";
 import { macroCategories } from "@/data/macroCategories";
 import { macroTemplates } from "@/data/macroTemplates";
-import type { AppState, EditorSettings, Scenario, ScenarioFolder } from "@/types/editor";
+import type {
+  AppState,
+  BranchBlock,
+  BranchOption,
+  EditorSettings,
+  Scenario,
+  ScenarioFolder,
+} from "@/types/editor";
 import type { MacroTemplate } from "@/types/macro";
 
 type ScenarioSidebarProps = {
@@ -35,6 +42,23 @@ type Props = {
   onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
+  // Branch handlers
+  onAddBranch: (afterId?: string) => void;
+  onUpdateBranch: (id: string, patch: Partial<Pick<BranchBlock, "title" | "description">>) => void;
+  onDeleteBranch: (id: string) => void;
+  onAddBranchOption: (branchId: string) => void;
+  onUpdateBranchOption: (
+    branchId: string,
+    optionId: string,
+    patch: Partial<Pick<BranchOption, "title" | "description" | "condition" | "collapsed">>,
+  ) => void;
+  onDeleteBranchOption: (branchId: string, optionId: string) => void;
+  onReorderBranchOption: (branchId: string, dragId: string, dropId: string, pos: "before" | "after") => void;
+  onSelectBranchOption: (branchId: string, optionId: string | null) => void;
+  onAddLineToOption: (branchId: string, optionId: string, labelId: string, afterId?: string) => void;
+  onUpdateLineInOption: (branchId: string, optionId: string, lineId: string, content: string) => void;
+  onDeleteLineInOption: (branchId: string, optionId: string, lineId: string) => void;
+  onChangeLabelInOption: (branchId: string, optionId: string, lineId: string, labelId: string) => void;
   onUpdateSettings: (patch: Partial<EditorSettings>) => void;
   onSave: () => void;
   onOpenLabelManager: () => void;
@@ -50,6 +74,18 @@ export default function SplitView({
   onChangeLabelId,
   onDeleteLine,
   onAddLine,
+  onAddBranch,
+  onUpdateBranch,
+  onDeleteBranch,
+  onAddBranchOption,
+  onUpdateBranchOption,
+  onDeleteBranchOption,
+  onReorderBranchOption,
+  onSelectBranchOption,
+  onAddLineToOption,
+  onUpdateLineInOption,
+  onDeleteLineInOption,
+  onChangeLabelInOption,
   onUpdateSettings,
   onSave,
   onOpenLabelManager,
@@ -63,7 +99,7 @@ export default function SplitView({
 
   return (
     <div className="split-view">
-      {/* Panel 1: 카테고리 목록 (고정 160px) */}
+      {/* Panel 1: 카테고리 목록 (flex 2) */}
       <div className="split-panel split-macro-list">
         <MacroList
           categories={macroCategories}
@@ -74,7 +110,7 @@ export default function SplitView({
         />
       </div>
 
-      {/* Panel 2: 매크로 편집 (고정 380px) */}
+      {/* Panel 2: 매크로 편집 (flex 3) */}
       <div className="split-panel split-macro-content">
         <MacroEditorPanels
           key={selectedTemplate.id}
@@ -84,7 +120,7 @@ export default function SplitView({
         />
       </div>
 
-      {/* Panel 3: 스크립트 편집 (나머지) */}
+      {/* Panel 3: 스크립트 편집 (flex 5) */}
       <div className="split-panel split-script-panel">
         <TopToolbar
           settings={appState.settings}
@@ -93,6 +129,7 @@ export default function SplitView({
           onOpenScenarioPanel={() => setScenarioPanelOpen(true)}
           onUpdateSettings={onUpdateSettings}
           onAddLine={onAddLine}
+          onAddBranch={onAddBranch}
           onOpenLabelManager={onOpenLabelManager}
           onSave={onSave}
         />
@@ -106,10 +143,21 @@ export default function SplitView({
             onDeleteLine={onDeleteLine}
             onAddLine={onAddLine}
             onRenameScenario={scenarioSidebarProps.onRename}
+            onAddBranch={onAddBranch}
+            onUpdateBranch={onUpdateBranch}
+            onDeleteBranch={onDeleteBranch}
+            onAddBranchOption={onAddBranchOption}
+            onUpdateBranchOption={onUpdateBranchOption}
+            onDeleteBranchOption={onDeleteBranchOption}
+            onReorderBranchOption={onReorderBranchOption}
+            onSelectBranchOption={onSelectBranchOption}
+            onAddLineToOption={onAddLineToOption}
+            onUpdateLineInOption={onUpdateLineInOption}
+            onDeleteLineInOption={onDeleteLineInOption}
+            onChangeLabelInOption={onChangeLabelInOption}
           />
         </div>
 
-        {/* 시나리오 패널 오버레이 */}
         {scenarioPanelOpen && (
           <ScenarioPanel
             scenarios={scenarioSidebarProps.scenarios}
