@@ -23,11 +23,33 @@ export type ScriptLine = {
   updatedAt: number;
 };
 
+export type BranchOption = {
+  id: string;
+  title: string;
+  description?: string;
+  condition?: string;
+  lines: ScriptLine[];
+  collapsed?: boolean;
+};
+
+export type BranchBlock = {
+  id: string;
+  type: "branch";
+  title: string;
+  description?: string;
+  selectedOptionId?: string;
+  options: BranchOption[];
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ScriptNode = ScriptLine | BranchBlock;
+
 export type Scenario = {
   id: string;
   folderId: string | null;
   title: string;
-  lines: ScriptLine[];
+  lines: ScriptNode[];
   createdAt: number;
   updatedAt: number;
 };
