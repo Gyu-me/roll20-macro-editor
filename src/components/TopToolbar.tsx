@@ -9,6 +9,7 @@ type Props = {
   onOpenScenarioPanel: () => void;
   onUpdateSettings: (patch: Partial<EditorSettings>) => void;
   onAddLine: (labelId: string) => void;
+  onAddBranch: () => void;
   onOpenLabelManager: () => void;
   onSave: () => void;
 };
@@ -27,6 +28,7 @@ export default function TopToolbar({
   onOpenScenarioPanel,
   onUpdateSettings,
   onAddLine,
+  onAddBranch,
   onOpenLabelManager,
   onSave,
 }: Props) {
@@ -75,6 +77,20 @@ export default function TopToolbar({
           title="태그 추가 및 관리"
         >
           + 태그
+        </button>
+
+        <div className="toolbar-sep" />
+
+        {/* 분기 추가 버튼 */}
+        <button
+          type="button"
+          className="toolbar-branch-btn"
+          onClick={onAddBranch}
+          disabled={isMastering}
+          title="분기 블록 추가"
+        >
+          <span className="toolbar-branch-icon">⑂</span>
+          분기
         </button>
       </div>
 
