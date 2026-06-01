@@ -6,17 +6,27 @@ import MacroEditor from "@/components/MacroEditor";
 import SplitView from "@/components/SplitView";
 import { DEFAULT_LABELS } from "@/data/defaultLabels";
 import { getInitialState } from "@/data/initialState";
+import type {
+  AppState,
+  BranchBlock,
+  BranchOption,
+  EditorSettings,
+  LabelSetting,
+  Scenario,
+  ScriptLine,
+  ScriptLineType,
+  ScriptNode,
+} from "@/types/editor";
+import { loadState, saveState } from "@/utils/storage";
 
 function migrateState(state: AppState): AppState {
   const defaultIds = new Set(DEFAULT_LABELS.map((d) => d.id));
 
-  // 구버전 기본 태그 제거 + 커스텀 태그 유지
   const filtered = state.settings.labels.filter((l) => {
     if (!l.isDefault) return true;
     return defaultIds.has(l.id);
   });
 
-  // 기본 라벨 속성을 최신 DEFAULT_LABELS 기준으로 동기화
   const syncedLabels = filtered.map((l) => {
     if (!l.isDefault) return l;
     const def = DEFAULT_LABELS.find((d) => d.id === l.id);
@@ -30,7 +40,6 @@ function migrateState(state: AppState): AppState {
     };
   });
 
-  // 누락된 기본 라벨 추가
   const existingIds = new Set(syncedLabels.map((l) => l.id));
   const missing = DEFAULT_LABELS.filter((d) => !existingIds.has(d.id)).map(
     (d) => ({ ...d }),
@@ -44,15 +53,6 @@ function migrateState(state: AppState): AppState {
     },
   };
 }
-import type {
-  AppState,
-  EditorSettings,
-  LabelSetting,
-  Scenario,
-  ScriptLine,
-  ScriptLineType,
-} from "@/types/editor";
-import { loadState, saveState } from "@/utils/storage";
 
 type AppView = "split" | "macro";
 
@@ -135,7 +135,6 @@ export default function AppShell() {
         prev.selectedScenarioId === id
           ? (rest[0]?.id ?? null)
           : prev.selectedScenarioId;
-      // Also remove from folders
       const folders = prev.folders.map((f) => ({
         ...f,
         scenarioIds: f.scenarioIds.filter((sid) => sid !== id),
@@ -175,7 +174,6 @@ export default function AppShell() {
   const handleDeleteFolder = useCallback((id: string) => {
     setAppState((prev) => {
       if (!prev) return prev;
-      // Move scenarios in this folder to root
       const scenarios = prev.scenarios.map((s) =>
         s.folderId === id ? { ...s, folderId: null } : s,
       );
@@ -224,7 +222,6 @@ export default function AppShell() {
         let folders = prev.folders;
 
         if (pos === "into") {
-          // 폴더 위에 드랍 → 해당 폴더로 이동
           newFolderId = dropId;
           const updated = { ...dragged, folderId: newFolderId, updatedAt: Date.now() };
           scenarios.push(updated);
@@ -233,7 +230,6 @@ export default function AppShell() {
             return { ...f, scenarioIds: f.scenarioIds.filter((id) => id !== dragId) };
           });
         } else {
-          // 다른 시나리오 앞/뒤에 드랍
           const target = scenarios.find((s) => s.id === dropId);
           if (!target) return prev;
           newFolderId = target.folderId;
@@ -273,7 +269,7 @@ export default function AppShell() {
   // ── Line mutations ───────────────────────────────────────
 
   const patchScenarioLines = useCallback(
-    (updater: (lines: ScriptLine[]) => ScriptLine[]) => {
+    (updater: (lines: ScriptNode[]) => ScriptNode[]) => {
       setAppState((prev) => {
         if (!prev) return prev;
         const selId = prev.selectedScenarioId;
@@ -293,9 +289,10 @@ export default function AppShell() {
   const handleUpdateLine = useCallback(
     (id: string, content: string) => {
       patchScenarioLines((lines) =>
-        lines.map((l) =>
-          l.id === id ? { ...l, content, updatedAt: Date.now() } : l,
-        ),
+        lines.map((n) => {
+          if (n.type === "branch" || n.id !== id) return n;
+          return { ...n, content, updatedAt: Date.now() };
+        }),
       );
     },
     [patchScenarioLines],
@@ -307,9 +304,10 @@ export default function AppShell() {
         ? (labelId as ScriptLineType)
         : "custom";
       patchScenarioLines((lines) =>
-        lines.map((l) =>
-          l.id === id ? { ...l, labelId, type, updatedAt: Date.now() } : l,
-        ),
+        lines.map((n) => {
+          if (n.type === "branch" || n.id !== id) return n;
+          return { ...n, labelId, type, updatedAt: Date.now() };
+        }),
       );
     },
     [patchScenarioLines],
@@ -317,7 +315,7 @@ export default function AppShell() {
 
   const handleDeleteLine = useCallback(
     (id: string) => {
-      patchScenarioLines((lines) => lines.filter((l) => l.id !== id));
+      patchScenarioLines((lines) => lines.filter((n) => n.id !== id));
     },
     [patchScenarioLines],
   );
@@ -340,11 +338,248 @@ export default function AppShell() {
       };
       patchScenarioLines((lines) => {
         if (!afterId) return [...lines, newLine];
-        const idx = lines.findIndex((l) => l.id === afterId);
+        const idx = lines.findIndex((n) => n.id === afterId);
         const next = [...lines];
         next.splice(idx + 1, 0, newLine);
         return next;
       });
+    },
+    [patchScenarioLines],
+  );
+
+  // ── Branch mutations ─────────────────────────────────────
+
+  const handleAddBranch = useCallback(
+    (afterId?: string) => {
+      const now = Date.now();
+      const newBranch: BranchBlock = {
+        id: uid(),
+        type: "branch",
+        title: "새 분기",
+        options: [
+          { id: uid(), title: "루트 A", lines: [], collapsed: false },
+          { id: uid(), title: "루트 B", lines: [], collapsed: false },
+        ],
+        createdAt: now,
+        updatedAt: now,
+      };
+      patchScenarioLines((lines) => {
+        if (!afterId) return [...lines, newBranch];
+        const idx = lines.findIndex((n) => n.id === afterId);
+        const next = [...lines];
+        next.splice(idx + 1, 0, newBranch);
+        return next;
+      });
+    },
+    [patchScenarioLines],
+  );
+
+  const handleUpdateBranch = useCallback(
+    (id: string, patch: Partial<Pick<BranchBlock, "title" | "description">>) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== id || n.type !== "branch") return n;
+          return { ...n, ...patch, updatedAt: Date.now() };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleDeleteBranch = useCallback(
+    (id: string) => {
+      patchScenarioLines((lines) => lines.filter((n) => n.id !== id));
+    },
+    [patchScenarioLines],
+  );
+
+  const handleAddBranchOption = useCallback(
+    (branchId: string) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          const newOption: BranchOption = {
+            id: uid(),
+            title: `루트 ${String.fromCharCode(65 + n.options.length)}`,
+            lines: [],
+            collapsed: false,
+          };
+          return { ...n, options: [...n.options, newOption], updatedAt: Date.now() };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleUpdateBranchOption = useCallback(
+    (
+      branchId: string,
+      optionId: string,
+      patch: Partial<Pick<BranchOption, "title" | "description" | "condition" | "collapsed">>,
+    ) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.map((opt) =>
+              opt.id === optionId ? { ...opt, ...patch } : opt,
+            ),
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleDeleteBranchOption = useCallback(
+    (branchId: string, optionId: string) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.filter((opt) => opt.id !== optionId),
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleReorderBranchOption = useCallback(
+    (branchId: string, dragId: string, dropId: string, pos: "before" | "after") => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          const opts = [...n.options];
+          const dragIdx = opts.findIndex((o) => o.id === dragId);
+          if (dragIdx === -1) return n;
+          const [dragged] = opts.splice(dragIdx, 1);
+          const dropIdx = opts.findIndex((o) => o.id === dropId);
+          opts.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, dragged);
+          return { ...n, options: opts, updatedAt: Date.now() };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleSelectBranchOption = useCallback(
+    (branchId: string, optionId: string | null) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return { ...n, selectedOptionId: optionId ?? undefined, updatedAt: Date.now() };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleAddLineToOption = useCallback(
+    (branchId: string, optionId: string, labelId: string, afterId?: string) => {
+      const now = Date.now();
+      const type: ScriptLineType = KNOWN_TYPES.includes(labelId as ScriptLineType)
+        ? (labelId as ScriptLineType)
+        : "custom";
+      const newLine: ScriptLine = {
+        id: uid(),
+        type,
+        labelId,
+        content: "",
+        createdAt: now,
+        updatedAt: now,
+      };
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.map((opt) => {
+              if (opt.id !== optionId) return opt;
+              if (!afterId) return { ...opt, lines: [...opt.lines, newLine] };
+              const idx = opt.lines.findIndex((l) => l.id === afterId);
+              const next = [...opt.lines];
+              next.splice(idx + 1, 0, newLine);
+              return { ...opt, lines: next };
+            }),
+            updatedAt: now,
+          };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleUpdateLineInOption = useCallback(
+    (branchId: string, optionId: string, lineId: string, content: string) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.map((opt) => {
+              if (opt.id !== optionId) return opt;
+              return {
+                ...opt,
+                lines: opt.lines.map((l) =>
+                  l.id === lineId ? { ...l, content, updatedAt: Date.now() } : l,
+                ),
+              };
+            }),
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleDeleteLineInOption = useCallback(
+    (branchId: string, optionId: string, lineId: string) => {
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.map((opt) => {
+              if (opt.id !== optionId) return opt;
+              return { ...opt, lines: opt.lines.filter((l) => l.id !== lineId) };
+            }),
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+    },
+    [patchScenarioLines],
+  );
+
+  const handleChangeLabelInOption = useCallback(
+    (branchId: string, optionId: string, lineId: string, labelId: string) => {
+      const type: ScriptLineType = KNOWN_TYPES.includes(labelId as ScriptLineType)
+        ? (labelId as ScriptLineType)
+        : "custom";
+      patchScenarioLines((lines) =>
+        lines.map((n) => {
+          if (n.id !== branchId || n.type !== "branch") return n;
+          return {
+            ...n,
+            options: n.options.map((opt) => {
+              if (opt.id !== optionId) return opt;
+              return {
+                ...opt,
+                lines: opt.lines.map((l) =>
+                  l.id === lineId ? { ...l, labelId, type, updatedAt: Date.now() } : l,
+                ),
+              };
+            }),
+            updatedAt: Date.now(),
+          };
+        }),
+      );
     },
     [patchScenarioLines],
   );
@@ -469,7 +704,6 @@ export default function AppShell() {
       reader.onload = (ev) => {
         try {
           const imported = JSON.parse(ev.target?.result as string) as AppState;
-          // Merge: ensure new default labels exist
           const existingIds = new Set(imported.settings?.labels?.map((l) => l.id) ?? []);
           const missingDefaults = DEFAULT_LABELS.filter((d) => !existingIds.has(d.id));
           if (missingDefaults.length > 0) {
@@ -532,6 +766,18 @@ export default function AppShell() {
     onChangeLabelId: handleChangeLabelId,
     onDeleteLine: handleDeleteLine,
     onAddLine: handleAddLine,
+    onAddBranch: handleAddBranch,
+    onUpdateBranch: handleUpdateBranch,
+    onDeleteBranch: handleDeleteBranch,
+    onAddBranchOption: handleAddBranchOption,
+    onUpdateBranchOption: handleUpdateBranchOption,
+    onDeleteBranchOption: handleDeleteBranchOption,
+    onReorderBranchOption: handleReorderBranchOption,
+    onSelectBranchOption: handleSelectBranchOption,
+    onAddLineToOption: handleAddLineToOption,
+    onUpdateLineInOption: handleUpdateLineInOption,
+    onDeleteLineInOption: handleDeleteLineInOption,
+    onChangeLabelInOption: handleChangeLabelInOption,
     onUpdateSettings: handleUpdateSettings,
     onSave: handleSave,
     onOpenLabelManager: () => setIsLabelManagerOpen(true),
