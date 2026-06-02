@@ -42,6 +42,7 @@ type Props = {
   onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
+  onReorderNode: (dragId: string, dropId: string, pos: "before" | "after") => void;
   // Branch handlers
   onAddBranch: (afterId?: string) => void;
   onUpdateBranch: (id: string, patch: Partial<Pick<BranchBlock, "title" | "description">>) => void;
@@ -74,6 +75,7 @@ export default function SplitView({
   onChangeLabelId,
   onDeleteLine,
   onAddLine,
+  onReorderNode,
   onAddBranch,
   onUpdateBranch,
   onDeleteBranch,
@@ -142,6 +144,7 @@ export default function SplitView({
             onChangeLabelId={onChangeLabelId}
             onDeleteLine={onDeleteLine}
             onAddLine={onAddLine}
+            onReorderNode={onReorderNode}
             onRenameScenario={scenarioSidebarProps.onRename}
             onAddBranch={onAddBranch}
             onUpdateBranch={onUpdateBranch}

@@ -37,8 +37,11 @@ type Props = {
   onChangeLabelId: (id: string, labelId: string) => void;
   onDeleteLine: (id: string) => void;
   onAddLine: (labelId: string, afterId?: string, content?: string) => void;
+  onReorderNode: (dragId: string, dropId: string, pos: "before" | "after") => void;
   onRenameScenario: (id: string, name: string) => void;
 } & BranchHandlers;
+
+type DropInfo = { id: string; pos: "before" | "after" } | null;
 
 export default function ScriptEditor({
   scenario,
@@ -47,6 +50,7 @@ export default function ScriptEditor({
   onChangeLabelId,
   onDeleteLine,
   onAddLine,
+  onReorderNode,
   onRenameScenario,
   onAddBranch,
   onUpdateBranch,
@@ -66,7 +70,12 @@ export default function ScriptEditor({
   const [titleDraft, setTitleDraft] = useState(scenario.title);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
+  // D&D 상태
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dropInfo, setDropInfo] = useState<DropInfo>(null);
+
   const { labels, platformMode, editorMode } = settings;
+  const isMastering = editorMode === "mastering";
 
   useEffect(() => {
     setTitleDraft(scenario.title);
@@ -89,6 +98,43 @@ export default function ScriptEditor({
 
   const getLabelForLine = (line: ScriptLine) =>
     labels.find((l) => l.id === line.labelId) ?? labels[0];
+
+  // ── D&D 핸들러 ────────────────────────────────────────────
+
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    setDraggingId(id);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggingId === id) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const pos: "before" | "after" = e.clientY < rect.top + rect.height / 2 ? "before" : "after";
+    setDropInfo({ id, pos });
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (!(e.currentTarget as Element).contains(e.relatedTarget as Element)) {
+      setDropInfo(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (draggingId && draggingId !== targetId && dropInfo) {
+      onReorderNode(draggingId, targetId, dropInfo.pos);
+    }
+    setDraggingId(null);
+    setDropInfo(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingId(null);
+    setDropInfo(null);
+  };
 
   const nodeCount = scenario.lines.length;
 
@@ -122,9 +168,7 @@ export default function ScriptEditor({
                 <span className="scenario-title-edit-hint">✏</span>
               </h2>
             )}
-            <span className="scenario-line-count">
-              {nodeCount}개 항목
-            </span>
+            <span className="scenario-line-count">{nodeCount}개 항목</span>
           </div>
 
           {scenario.lines.length === 0 ? (
@@ -134,43 +178,68 @@ export default function ScriptEditor({
           ) : (
             <div className="script-lines">
               {scenario.lines.map((node) => {
-                if (node.type === "branch") {
-                  return (
-                    <BranchBlock
-                      key={node.id}
-                      branch={node}
-                      labels={labels}
-                      platformMode={platformMode}
-                      editorMode={editorMode}
-                      onUpdate={onUpdateBranch}
-                      onDelete={onDeleteBranch}
-                      onAddOption={onAddBranchOption}
-                      onUpdateOption={onUpdateBranchOption}
-                      onDeleteOption={onDeleteBranchOption}
-                      onReorderOption={onReorderBranchOption}
-                      onSelectOption={onSelectBranchOption}
-                      onAddLineToOption={onAddLineToOption}
-                      onUpdateLineInOption={onUpdateLineInOption}
-                      onDeleteLineInOption={onDeleteLineInOption}
-                      onChangeLabelInOption={onChangeLabelInOption}
-                      onCopied={setLastCopied}
-                    />
-                  );
-                }
+                const isDragging = draggingId === node.id;
+                const isDropBefore = dropInfo?.id === node.id && dropInfo.pos === "before";
+                const isDropAfter = dropInfo?.id === node.id && dropInfo.pos === "after";
+
                 return (
-                  <ScriptLineItem
+                  <div
                     key={node.id}
-                    line={node}
-                    label={getLabelForLine(node)}
-                    labels={labels}
-                    platformMode={platformMode}
-                    editorMode={editorMode}
-                    onUpdate={onUpdateLine}
-                    onChangeLabel={onChangeLabelId}
-                    onDelete={onDeleteLine}
-                    onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
-                    onCopied={setLastCopied}
-                  />
+                    className={[
+                      "script-node-wrap",
+                      isDragging ? "is-dragging" : "",
+                      isDropBefore ? "drop-before" : "",
+                      isDropAfter ? "drop-after" : "",
+                    ].filter(Boolean).join(" ")}
+                    draggable={!isMastering}
+                    onDragStart={(e) => handleDragStart(e, node.id)}
+                    onDragOver={(e) => handleDragOver(e, node.id)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, node.id)}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {!isMastering && (
+                      <div className="script-drag-handle" title="드래그하여 순서 변경">
+                        ⠿
+                      </div>
+                    )}
+
+                    <div className="script-node-content">
+                      {node.type === "branch" ? (
+                        <BranchBlock
+                          branch={node}
+                          labels={labels}
+                          platformMode={platformMode}
+                          editorMode={editorMode}
+                          onUpdate={onUpdateBranch}
+                          onDelete={onDeleteBranch}
+                          onAddOption={onAddBranchOption}
+                          onUpdateOption={onUpdateBranchOption}
+                          onDeleteOption={onDeleteBranchOption}
+                          onReorderOption={onReorderBranchOption}
+                          onSelectOption={onSelectBranchOption}
+                          onAddLineToOption={onAddLineToOption}
+                          onUpdateLineInOption={onUpdateLineInOption}
+                          onDeleteLineInOption={onDeleteLineInOption}
+                          onChangeLabelInOption={onChangeLabelInOption}
+                          onCopied={setLastCopied}
+                        />
+                      ) : (
+                        <ScriptLineItem
+                          line={node}
+                          label={getLabelForLine(node)}
+                          labels={labels}
+                          platformMode={platformMode}
+                          editorMode={editorMode}
+                          onUpdate={onUpdateLine}
+                          onChangeLabel={onChangeLabelId}
+                          onDelete={onDeleteLine}
+                          onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
+                          onCopied={setLastCopied}
+                        />
+                      )}
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -178,7 +247,7 @@ export default function ScriptEditor({
         </div>
       </div>
 
-      {editorMode === "mastering" && (
+      {isMastering && (
         <div className="mastering-bar">
           <span className="mastering-bar-label">마스터링 모드</span>
           {lastCopied ? (

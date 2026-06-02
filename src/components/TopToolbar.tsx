@@ -85,7 +85,7 @@ export default function TopToolbar({
         <button
           type="button"
           className="toolbar-branch-btn"
-          onClick={onAddBranch}
+          onClick={() => onAddBranch()}
           disabled={isMastering}
           title="분기 블록 추가"
         >
