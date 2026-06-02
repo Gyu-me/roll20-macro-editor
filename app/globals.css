@@ -770,6 +770,54 @@ textarea:focus {
   overflow: hidden;
 }
 
+/* Scenario view wrapper */
+.app-content.scenario-view-wrap {
+  overflow: hidden;
+}
+
+.scenario-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.scenario-view-copy-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.scenario-copy-btn {
+  padding: 5px 14px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.scenario-copy-btn:hover {
+  opacity: 0.85;
+}
+
+.scenario-copy-msg {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.scenario-view-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
 /* Macro tab wrapper */
 .macro-tab-wrap {
   flex: 1;
@@ -1064,6 +1112,64 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ── 드래그 래퍼 ────────────────────────────────────────── */
+
+.script-node-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.08s;
+}
+
+.script-node-wrap.is-dragging {
+  opacity: 0.35;
+}
+
+.script-node-wrap.drop-before {
+  border-top-color: var(--primary);
+}
+
+.script-node-wrap.drop-after {
+  border-bottom-color: var(--primary);
+}
+
+.script-drag-handle {
+  flex: 0 0 18px;
+  width: 18px;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 11px;
+  color: #d0d0d0;
+  cursor: grab;
+  font-size: 13px;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.script-node-wrap:hover .script-drag-handle {
+  opacity: 1;
+}
+
+.script-drag-handle:hover {
+  color: #888888;
+}
+
+.script-drag-handle:active {
+  cursor: grabbing;
+}
+
+.script-node-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .empty-scenario-hint {
@@ -1772,24 +1878,26 @@ textarea:focus {
   overflow: hidden;
 }
 
-/* 카테고리 목록 — 고정 너비 */
+/* 카테고리 목록 — 2 */
 .split-macro-list {
-  flex: 0 0 160px;
+  flex: 2 2 0;
+  min-width: 120px;
   background: var(--panel);
   border-right: 1px solid var(--border);
 }
 
-/* 매크로 편집 — 고정 너비 */
+/* 매크로 편집 — 3 */
 .split-macro-content {
-  flex: 0 0 380px;
+  flex: 3 3 0;
+  min-width: 180px;
   background: var(--panel-soft);
   border-right: 1px solid var(--border);
 }
 
-/* 스크립트 편집 — 나머지 전부 */
+/* 스크립트 편집 — 5 */
 .split-script-panel {
-  flex: 1;
-  min-width: 320px;
+  flex: 5 5 0;
+  min-width: 300px;
   position: relative;
 }
 
@@ -2157,7 +2265,20 @@ details[open] > .cp-details-summary::before {
   padding: 4px 0 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+/* compact 색상 입력 — hex 텍스트 입력칸만 축소 */
+.cp-details-body .color-field-row input[type="text"] {
+  width: 100px;
+  min-width: 0;
+  flex: 0 0 100px;
+}
+
+.cp-details-body .save-color-btn {
+  padding: 0 6px;
+  font-size: 11px;
+  width: 60px;
 }
 
 .cp-code-textarea {
@@ -2844,4 +2965,410 @@ details[open] > .cp-details-summary::before {
   height: auto;
   margin: 0;
   cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Toolbar — 분기 추가 버튼
+   ═══════════════════════════════════════════════════════ */
+
+.toolbar-branch-btn {
+  height: 30px;
+  padding: 0 11px 0 8px;
+  border: 1.5px solid #444444;
+  border-radius: 8px;
+  background: #333333;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.toolbar-branch-btn:hover:not(:disabled) {
+  background: #111111;
+  border-color: #111111;
+}
+
+.toolbar-branch-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.toolbar-branch-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Branch Block — 분기 블록
+   ═══════════════════════════════════════════════════════ */
+
+.branch-block {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 6px 0;
+  background: #ffffff;
+}
+
+/* ── 헤더 ────────────────────────────────────────────── */
+
+.branch-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: #111111;
+  color: #ffffff;
+  min-height: 40px;
+}
+
+.branch-header-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.branch-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-title--editable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin-left: -4px;
+  transition: background 0.1s;
+}
+
+.branch-title--editable:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.branch-title-input {
+  flex: 1;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.45);
+  border-radius: 0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  outline: none;
+  padding: 1px 2px 2px;
+  min-width: 80px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.branch-header-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.branch-header-btn {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.branch-header-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.branch-header-btn--danger:hover {
+  background: rgba(239, 30, 43, 0.35);
+  border-color: rgba(239, 30, 43, 0.6);
+  color: #ffffff;
+}
+
+/* ── 바디 ────────────────────────────────────────────── */
+
+.branch-body {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #F2F2F2;
+}
+
+.branch-empty-hint {
+  margin: 0;
+  padding: 8px 4px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.branch-add-option-btn {
+  align-self: flex-start;
+  height: 28px;
+  padding: 0 12px;
+  border: 1px dashed #aaaaaa;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.branch-add-option-btn:hover {
+  border-color: #555555;
+  color: var(--text);
+}
+
+/* ── 루트 카드 ───────────────────────────────────────── */
+
+.branch-option {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.branch-option.is-selected {
+  border-color: #3a3a3a;
+}
+
+.branch-option-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 8px;
+  background: #EBEBEB;
+  border-bottom: 1px solid var(--line);
+  min-height: 36px;
+}
+
+.branch-option.is-selected > .branch-option-header {
+  background: #3a3a3a;
+  border-color: #3a3a3a;
+}
+
+.branch-option-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--muted);
+  width: 14px;
+  flex-shrink: 0;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.branch-option-toggle:hover {
+  color: var(--text);
+}
+
+.branch-option-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-option.is-selected .branch-option-title {
+  color: #ffffff;
+}
+
+.branch-option-title--editable {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 4px;
+  margin-left: -4px;
+  transition: background 0.1s;
+}
+
+.branch-option-title--editable:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.branch-option-title-input {
+  flex: 1;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid #999999;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  outline: none;
+  padding: 1px 2px 2px;
+  min-width: 60px;
+  font-family: inherit;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.branch-option.is-selected .branch-option-title-input {
+  color: #ffffff;
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.branch-option-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.branch-option-action-btn {
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid #d0d0d0;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.branch-option-action-btn:hover:not(:disabled) {
+  background: #f4f4f4;
+  color: var(--text);
+  border-color: #aaaaaa;
+}
+
+.branch-option-action-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.branch-option-action-btn--danger:hover:not(:disabled) {
+  background: #EEEEEE;
+  color: #333333;
+  border-color: #aaaaaa;
+}
+
+/* 마스터링 모드 선택 버튼 */
+.branch-option-select-btn {
+  height: 26px;
+  padding: 0 12px;
+  border: 1.5px solid #888888;
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--text);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.branch-option-select-btn:hover {
+  border-color: #111111;
+  background: #111111;
+  color: #ffffff;
+}
+
+.branch-option-select-btn.is-selected {
+  background: #3a3a3a;
+  border-color: #3a3a3a;
+  color: #ffffff;
+}
+
+.branch-option-select-btn.is-selected:hover {
+  background: #555555;
+  border-color: #555555;
+}
+
+/* ── 루트 바디 ───────────────────────────────────────── */
+
+.branch-option-body {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.branch-option-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.branch-option-empty-hint {
+  margin: 0;
+  padding: 6px 2px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* 루트 라인 추가 버튼 행 */
+.branch-option-add-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed #d8d8d8;
+}
+
+.branch-option-add-line-btn {
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+}
+
+.branch-option-add-line-btn:hover {
+  border-color: var(--tag-color, #aaa);
+  color: var(--text);
+  background: #f8f8f8;
+}
+
+.branch-option-add-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }

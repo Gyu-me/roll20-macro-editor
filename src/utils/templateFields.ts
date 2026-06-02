@@ -29,8 +29,8 @@ export function parseTemplateFields(code: string): FieldDef[] {
     fields.push({ key: `prompt_${label}`, label, type: "text", defaultValue });
   }
 
-  // #한글색상이름 (Korean color placeholder names like #색상코드, #배경색)
-  const colorRegex = /#([가-힣]+)/g;
+  // #한글색상이름 (Korean color placeholder names like #색상코드, #배경색, #네온색1)
+  const colorRegex = /#([가-힣][가-힣0-9]*)/g;
   while ((m = colorRegex.exec(code)) !== null) {
     const colorName = m[1];
     const key = `color_${colorName}`;
