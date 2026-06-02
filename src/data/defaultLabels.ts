@@ -1,0 +1,50 @@
+import type { LabelSetting } from "@/types/editor";
+
+export const DEFAULT_LABELS: LabelSetting[] = [
+  {
+    id: "main",
+    name: "지문",
+    color: "#8FA85E",
+    backgroundColor: "#ffffff",
+    command: "",
+    order: 1,
+    isDefault: true,
+  },
+  {
+    id: "dialogue",
+    name: "대사",
+    color: "#333333",
+    backgroundColor: "#ffffff",
+    command: ``,
+    order: 2,
+    isDefault: true,
+  },
+  {
+    id: "investigation",
+    name: "조사",
+    color: "#5B6E8A",
+    backgroundColor: "#ffffff",
+    command: "",
+    order: 3,
+    isDefault: true,
+  },
+  {
+    id: "roll",
+    name: "판정",
+    color: "#0038A8",
+    backgroundColor: "#EEF3FF",
+    command: "",
+    order: 4,
+    isDefault: true,
+  },
+  {
+    id: "raw",
+    name: "코드",
+    color: "#253BFE",
+    backgroundColor: "#EEF0FF",
+    command: "",
+    order: 99,
+    isDefault: true,
+    hideFromToolbar: true,
+  },
+];
