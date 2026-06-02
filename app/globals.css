@@ -770,6 +770,54 @@ textarea:focus {
   overflow: hidden;
 }
 
+/* Scenario view wrapper */
+.app-content.scenario-view-wrap {
+  overflow: hidden;
+}
+
+.scenario-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.scenario-view-copy-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.scenario-copy-btn {
+  padding: 5px 14px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.scenario-copy-btn:hover {
+  opacity: 0.85;
+}
+
+.scenario-copy-msg {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.scenario-view-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
 /* Macro tab wrapper */
 .macro-tab-wrap {
   flex: 1;
@@ -1064,6 +1112,64 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ── 드래그 래퍼 ────────────────────────────────────────── */
+
+.script-node-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.08s;
+}
+
+.script-node-wrap.is-dragging {
+  opacity: 0.35;
+}
+
+.script-node-wrap.drop-before {
+  border-top-color: var(--primary);
+}
+
+.script-node-wrap.drop-after {
+  border-bottom-color: var(--primary);
+}
+
+.script-drag-handle {
+  flex: 0 0 18px;
+  width: 18px;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 11px;
+  color: #d0d0d0;
+  cursor: grab;
+  font-size: 13px;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.script-node-wrap:hover .script-drag-handle {
+  opacity: 1;
+}
+
+.script-drag-handle:hover {
+  color: #888888;
+}
+
+.script-drag-handle:active {
+  cursor: grabbing;
+}
+
+.script-node-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .empty-scenario-hint {
@@ -2159,7 +2265,20 @@ details[open] > .cp-details-summary::before {
   padding: 4px 0 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+/* compact 색상 입력 — hex 텍스트 입력칸만 축소 */
+.cp-details-body .color-field-row input[type="text"] {
+  width: 100px;
+  min-width: 0;
+  flex: 0 0 100px;
+}
+
+.cp-details-body .save-color-btn {
+  padding: 0 6px;
+  font-size: 11px;
+  width: 60px;
 }
 
 .cp-code-textarea {

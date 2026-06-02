@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import LabelManager from "@/components/LabelManager";
 import MacroEditor from "@/components/MacroEditor";
+import ScenarioView from "@/components/ScenarioView";
 import SplitView from "@/components/SplitView";
 import { DEFAULT_LABELS } from "@/data/defaultLabels";
 import { getInitialState } from "@/data/initialState";
@@ -54,7 +55,7 @@ function migrateState(state: AppState): AppState {
   };
 }
 
-type AppView = "split" | "macro";
+type AppView = "split" | "scenario" | "macro";
 
 const KNOWN_TYPES: ScriptLineType[] = [
   "main",
@@ -348,6 +349,22 @@ export default function AppShell() {
   );
 
   // ── Branch mutations ─────────────────────────────────────
+
+  const handleReorderNode = useCallback(
+    (dragId: string, dropId: string, pos: "before" | "after") => {
+      patchScenarioLines((lines) => {
+        const dragIdx = lines.findIndex((n) => n.id === dragId);
+        if (dragIdx === -1) return lines;
+        const next = [...lines];
+        const [dragged] = next.splice(dragIdx, 1);
+        const dropIdx = next.findIndex((n) => n.id === dropId);
+        if (dropIdx === -1) return lines;
+        next.splice(pos === "before" ? dropIdx : dropIdx + 1, 0, dragged);
+        return next;
+      });
+    },
+    [patchScenarioLines],
+  );
 
   const handleAddBranch = useCallback(
     (afterId?: string) => {
@@ -766,6 +783,7 @@ export default function AppShell() {
     onChangeLabelId: handleChangeLabelId,
     onDeleteLine: handleDeleteLine,
     onAddLine: handleAddLine,
+    onReorderNode: handleReorderNode,
     onAddBranch: handleAddBranch,
     onUpdateBranch: handleUpdateBranch,
     onDeleteBranch: handleDeleteBranch,
@@ -791,14 +809,21 @@ export default function AppShell() {
           className={`app-view-tab${view === "split" ? " is-active" : ""}`}
           onClick={() => setView("split")}
         >
-          시나리오 정리 + 롤꾸편집
+          시나리오 정리 + 롤꾸
+        </button>
+        <button
+          type="button"
+          className={`app-view-tab${view === "scenario" ? " is-active" : ""}`}
+          onClick={() => setView("scenario")}
+        >
+          시나리오
         </button>
         <button
           type="button"
           className={`app-view-tab${view === "macro" ? " is-active" : ""}`}
           onClick={() => setView("macro")}
         >
-          롤20꾸미기
+          롤꾸
         </button>
 
         <div className="app-tab-spacer" />
@@ -830,9 +855,13 @@ export default function AppShell() {
         </div>
       </div>
 
-      <div className={`app-content${view === "split" ? " script-view" : ""}`}>
+      <div className={`app-content${view === "split" ? " script-view" : ""}${view === "scenario" ? " scenario-view-wrap" : ""}`}>
         {view === "split" && selectedScenario && (
           <SplitView {...scriptProps} />
+        )}
+
+        {view === "scenario" && selectedScenario && (
+          <ScenarioView {...scriptProps} />
         )}
 
         {view === "macro" && (
