@@ -73,14 +73,14 @@ function buildScriptText(nodes: ScriptNode[], appState: AppState): string {
         for (const line of selected.lines) {
           const label = labelMap[line.labelId];
           if (!label) continue;
-          const out = getLineOutput(line as ScriptLine, label, appState.settings.platform);
+          const out = getLineOutput(line as ScriptLine, label, appState.settings.platformMode);
           if (out) lines.push(out);
         }
       }
     } else {
       const label = labelMap[node.labelId];
       if (!label) continue;
-      const out = getLineOutput(node as ScriptLine, label, appState.settings.platform);
+      const out = getLineOutput(node as ScriptLine, label, appState.settings.platformMode);
       if (out) lines.push(out);
     }
   }
