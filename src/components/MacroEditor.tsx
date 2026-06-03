@@ -5,6 +5,7 @@ import MacroList from "@/components/MacroList";
 import { macroCategories } from "@/data/macroCategories";
 import { macroTemplates } from "@/data/macroTemplates";
 import { useColorPalette } from "@/hooks/useColorPalette";
+import { useCustomCodes, type SavedCode } from "@/hooks/useCustomCodes";
 import { useTemplateMemo } from "@/hooks/useTemplateMemo";
 import type { ColorPreset, MacroTemplate, StyleVariant } from "@/types/macro";
 import { roll20CodeToHtml } from "@/utils/roll20Preview";
@@ -58,6 +59,7 @@ export type MacroEditorPanelsProps = {
 
 export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: MacroEditorPanelsProps) {
   const { colors: customPalette, saveColor, removeColor } = useColorPalette();
+  const { codes: savedCodes, saveCode, updateCode, deleteCode } = useCustomCodes();
 
   const [selectedVariantId, setSelectedVariantId] = useState<string>(
     selectedTemplate.variants?.[0]?.id ?? "",
@@ -102,6 +104,10 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
   const [memo, setMemo] = useTemplateMemo(selectedTemplate.id, selectedTemplate.memo);
   const [codeOverride, setCodeOverride] = useState<string | null>(null);
   const [copyMessage, setCopyMessage] = useState("");
+
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
+  const [saveMemo, setSaveMemo] = useState("");
 
   const generatedCode = useMemo(
     () => applyFieldValues(activeCode, fields, fieldValues),
@@ -165,6 +171,27 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
     if (onAddToScript && finalCode) {
       onAddToScript(finalCode);
     }
+  };
+
+  const handleOpenSaveDialog = () => {
+    setSaveName(selectedTemplate.name);
+    setSaveMemo("");
+    setSaveDialogOpen(true);
+  };
+
+  const handleConfirmSave = () => {
+    if (!saveName.trim()) return;
+    saveCode({
+      name: saveName.trim(),
+      memo: saveMemo.trim(),
+      code: finalCode,
+      baseTemplateId: selectedTemplate.id,
+    });
+    setSaveDialogOpen(false);
+  };
+
+  const handleLoadSavedCode = (entry: SavedCode) => {
+    setCodeOverride(entry.code);
   };
 
   const editFields = (
@@ -260,10 +287,47 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
       <section className="card">
         <div className="card-title-row">
           <h3>Roll20 코드 직접 편집</h3>
-          <span className="helper-text">
-            {codeOverride !== null ? "직접 수정 중" : "자동 생성됨"}
-          </span>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <span className="helper-text">
+              {codeOverride !== null ? "직접 수정 중" : "자동 생성됨"}
+            </span>
+            <button
+              type="button"
+              className="save-code-btn"
+              onClick={handleOpenSaveDialog}
+              title="현재 코드를 이름을 붙여 저장"
+            >
+              코드 저장
+            </button>
+          </div>
         </div>
+        {saveDialogOpen && (
+          <div className="save-dialog">
+            <input
+              type="text"
+              className="save-dialog-input"
+              placeholder="저장 이름"
+              value={saveName}
+              onChange={(e) => setSaveName(e.target.value)}
+              autoFocus
+            />
+            <input
+              type="text"
+              className="save-dialog-input"
+              placeholder="메모 (선택)"
+              value={saveMemo}
+              onChange={(e) => setSaveMemo(e.target.value)}
+            />
+            <div className="save-dialog-actions">
+              <button type="button" className="save-dialog-confirm" onClick={handleConfirmSave}>
+                저장
+              </button>
+              <button type="button" className="save-dialog-cancel" onClick={() => setSaveDialogOpen(false)}>
+                취소
+              </button>
+            </div>
+          </div>
+        )}
         <textarea
           value={finalCode}
           onChange={(e) => setCodeOverride(e.target.value)}
@@ -279,6 +343,15 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
           </button>
         )}
       </section>
+
+      {savedCodes.length > 0 && (
+        <SavedCodesPanel
+          codes={savedCodes}
+          onLoad={handleLoadSavedCode}
+          onUpdate={updateCode}
+          onDelete={deleteCode}
+        />
+      )}
     </>
   );
 
@@ -459,8 +532,59 @@ export function MacroEditorPanels({ selectedTemplate, compact, onAddToScript }: 
                   자동 생성으로 되돌리기
                 </button>
               )}
+              <button
+                type="button"
+                className="save-code-btn"
+                onClick={handleOpenSaveDialog}
+                style={{ marginTop: 6 }}
+              >
+                코드 저장
+              </button>
+              {saveDialogOpen && (
+                <div className="save-dialog">
+                  <input
+                    type="text"
+                    className="save-dialog-input"
+                    placeholder="저장 이름"
+                    value={saveName}
+                    onChange={(e) => setSaveName(e.target.value)}
+                    autoFocus
+                  />
+                  <input
+                    type="text"
+                    className="save-dialog-input"
+                    placeholder="메모 (선택)"
+                    value={saveMemo}
+                    onChange={(e) => setSaveMemo(e.target.value)}
+                  />
+                  <div className="save-dialog-actions">
+                    <button type="button" className="save-dialog-confirm" onClick={handleConfirmSave}>
+                      저장
+                    </button>
+                    <button type="button" className="save-dialog-cancel" onClick={() => setSaveDialogOpen(false)}>
+                      취소
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </details>
+
+          {/* ⑨ 저장된 코드 */}
+          {savedCodes.length > 0 && (
+            <details className="cp-details">
+              <summary className="cp-details-summary">저장된 코드 ({savedCodes.length})</summary>
+              <div className="cp-details-body">
+                <SavedCodesPanel
+                  codes={savedCodes}
+                  onLoad={handleLoadSavedCode}
+                  onUpdate={updateCode}
+                  onDelete={deleteCode}
+                  compact
+                />
+              </div>
+            </details>
+          )}
 
           {/* ⑧ 메모 */}
           <details className="cp-details">
@@ -563,6 +687,129 @@ function TextFieldInput({ field, value, onChange }: TextFieldInputProps) {
         />
       </div>
     </div>
+  );
+}
+
+// ── Saved codes panel ───────────────────────────────────
+
+type SavedCodesPanelProps = {
+  codes: SavedCode[];
+  onLoad: (entry: SavedCode) => void;
+  onUpdate: (id: string, updates: Partial<Pick<SavedCode, "name" | "memo" | "code">>) => void;
+  onDelete: (id: string) => void;
+  compact?: boolean;
+};
+
+function SavedCodesPanel({ codes, onLoad, onUpdate, onDelete, compact }: SavedCodesPanelProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editMemo, setEditMemo] = useState("");
+  const [editCode, setEditCode] = useState("");
+
+  const startEdit = (entry: SavedCode) => {
+    setEditingId(entry.id);
+    setEditName(entry.name);
+    setEditMemo(entry.memo);
+    setEditCode(entry.code);
+  };
+
+  const confirmEdit = () => {
+    if (!editingId) return;
+    onUpdate(editingId, { name: editName.trim(), memo: editMemo.trim(), code: editCode });
+    setEditingId(null);
+  };
+
+  if (compact) {
+    return (
+      <div className="saved-codes-list">
+        {codes.map((entry) =>
+          editingId === entry.id ? (
+            <div key={entry.id} className="saved-code-edit">
+              <input
+                className="save-dialog-input"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="이름"
+              />
+              <input
+                className="save-dialog-input"
+                value={editMemo}
+                onChange={(e) => setEditMemo(e.target.value)}
+                placeholder="메모"
+              />
+              <textarea
+                className="cp-code-textarea"
+                value={editCode}
+                onChange={(e) => setEditCode(e.target.value)}
+                rows={3}
+              />
+              <div className="save-dialog-actions">
+                <button type="button" className="save-dialog-confirm" onClick={confirmEdit}>확인</button>
+                <button type="button" className="save-dialog-cancel" onClick={() => setEditingId(null)}>취소</button>
+              </div>
+            </div>
+          ) : (
+            <div key={entry.id} className="saved-code-item">
+              <div className="saved-code-name">{entry.name}</div>
+              {entry.memo && <div className="saved-code-memo">{entry.memo}</div>}
+              <div className="saved-code-preview">{entry.code}</div>
+              <div className="saved-code-actions">
+                <button type="button" className="saved-code-load" onClick={() => onLoad(entry)}>불러오기</button>
+                <button type="button" className="saved-code-edit-btn" onClick={() => startEdit(entry)}>수정</button>
+                <button type="button" className="saved-code-delete" onClick={() => onDelete(entry.id)}>삭제</button>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <section className="card">
+      <h3>저장된 코드</h3>
+      <div className="saved-codes-list">
+        {codes.map((entry) =>
+          editingId === entry.id ? (
+            <div key={entry.id} className="saved-code-edit">
+              <input
+                className="save-dialog-input"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="이름"
+              />
+              <input
+                className="save-dialog-input"
+                value={editMemo}
+                onChange={(e) => setEditMemo(e.target.value)}
+                placeholder="메모"
+              />
+              <textarea
+                value={editCode}
+                onChange={(e) => setEditCode(e.target.value)}
+                rows={3}
+                aria-label="코드 수정"
+              />
+              <div className="save-dialog-actions">
+                <button type="button" className="save-dialog-confirm" onClick={confirmEdit}>확인</button>
+                <button type="button" className="save-dialog-cancel" onClick={() => setEditingId(null)}>취소</button>
+              </div>
+            </div>
+          ) : (
+            <div key={entry.id} className="saved-code-item">
+              <div className="saved-code-name">{entry.name}</div>
+              {entry.memo && <div className="saved-code-memo">{entry.memo}</div>}
+              <div className="saved-code-preview">{entry.code}</div>
+              <div className="saved-code-actions">
+                <button type="button" className="saved-code-load" onClick={() => onLoad(entry)}>불러오기</button>
+                <button type="button" className="saved-code-edit-btn" onClick={() => startEdit(entry)}>수정</button>
+                <button type="button" className="saved-code-delete" onClick={() => onDelete(entry.id)}>삭제</button>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+    </section>
   );
 }
 

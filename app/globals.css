@@ -37,7 +37,10 @@ body {
   color: var(--text);
   background: var(--bg);
   font-family:
-    Arial,
+    "Pretendard Variable",
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
     "Apple SD Gothic Neo",
     "Noto Sans KR",
     sans-serif;
@@ -3371,4 +3374,163 @@ details[open] > .cp-details-summary::before {
   height: 7px;
   border-radius: 50%;
   flex-shrink: 0;
+}
+
+/* ── Save code dialog ────────────────────────────── */
+.save-code-btn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px dashed var(--primary);
+  border-radius: 8px;
+  background: none;
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s;
+}
+.save-code-btn:hover {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.save-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.save-dialog-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.save-dialog-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.save-dialog-confirm {
+  height: 30px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.save-dialog-confirm:hover { opacity: 0.85; }
+
+.save-dialog-cancel {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.save-dialog-cancel:hover { color: var(--text); border-color: var(--text); }
+
+/* ── Saved codes list ────────────────────────────── */
+.saved-codes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-code-item {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.saved-code-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.saved-code-memo {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.saved-code-preview {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 48px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  padding: 4px 6px;
+  background: var(--bg);
+  border-radius: 6px;
+}
+
+.saved-code-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.saved-code-load {
+  height: 26px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+}
+.saved-code-load:hover { opacity: 0.85; }
+
+.saved-code-edit-btn {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+}
+.saved-code-edit-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+.saved-code-delete {
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.saved-code-delete:hover { border-color: #e74c3c; color: #e74c3c; }
+
+.saved-code-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  background: var(--surface);
 }

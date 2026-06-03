@@ -1,6 +1,8 @@
 import type { MacroTemplate } from "@/types/macro";
 
-const JUDGEMENT_STYLE = `text-decoration: none; font-style: normal !important; text-align: center; display: inline-block; color: white; letter-spacing: -1px; border-radius: 20px; padding: 5px 15px;margin-left: -4px;background-image: linear-gradient(135deg, #그라데이션시작, #그라데이션끝 &#41;`;
+const PF = `font-family: Pretendard, sans-serif !important;`;
+
+const JUDGEMENT_STYLE = `text-decoration: none; ${PF} font-style: normal !important; text-align: center; display: inline-block; color: white; letter-spacing: -1px; border-radius: 20px; padding: 5px 15px;margin-left: -4px;background-image: linear-gradient(135deg, #그라데이션시작, #그라데이션끝 &#41;`;
 
 export const macroTemplates: MacroTemplate[] = [
   // ────────────────────────────────────────
@@ -24,7 +26,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "Roll20 기본 기울임 없이 출력",
     previewText: "할말",
     keywords: ["나레이션", "기울임 제거", "normal", "desc"],
-    code: `/desc [?{할말}](#" style="text-decoration: none; font-style:normal; color:#333333;)`,
+    code: `/desc [?{할말} ](#" style="${PF} text-decoration: none; font-weight: normal; font-style:normal; color:#333333;)`,
   },
   {
     id: "narration-space",
@@ -61,15 +63,35 @@ export const macroTemplates: MacroTemplate[] = [
     categoryId: "basic",
     order: 6,
     name: "기본 텍스트 스타일",
-    memo: "기울임·굵게·둘 다 — 버튼으로 선택 후 텍스트 입력",
-    previewText: "*텍스트*",
-    keywords: ["기울임", "굵게", "볼드", "마크다운"],
-    code: `*?{텍스트|텍스트}*`,
+    memo: "기울임·굵게·둘 다·글자 색상 — 버튼으로 선택 후 텍스트 입력",
+    previewText: "텍스트",
+    keywords: ["기울임", "굵게", "볼드", "마크다운", "색상"],
+    code: `/desc [?{텍스트|텍스트}](#" style="${PF} text-decoration:none; font-style:italic; color:#색상코드;)`,
     variants: [
-      { id: "italic", name: "기울임", code: `*?{텍스트|텍스트}*` },
-      { id: "bold", name: "굵게", code: `**?{텍스트|텍스트}**` },
-      { id: "bold-italic", name: "둘 다", code: `***?{텍스트|텍스트}***` },
+      {
+        id: "italic",
+        name: "기울임",
+        code: `/desc [?{텍스트|텍스트}](#" style="${PF} text-decoration:none; font-style:italic; color:#색상코드;)`,
+      },
+      {
+        id: "bold",
+        name: "굵게",
+        code: `/desc [?{텍스트|텍스트}](#" style="${PF} text-decoration:none; font-weight:bold; font-style:normal; color:#색상코드;)`,
+      },
+      {
+        id: "bold-italic",
+        name: "둘 다",
+        code: `/desc [?{텍스트|텍스트}](#" style="${PF} text-decoration:none; font-style:italic; font-weight:bold; color:#색상코드;)`,
+      },
+      {
+        id: "color",
+        name: "글자 색상",
+        code: `/desc [?{텍스트|텍스트}](#" style="${PF} text-decoration:none; font-style:normal; font-weight:normal; color:#색상코드;)`,
+      },
     ],
+    fieldDefaults: {
+      "color_색상코드": "#333333",
+    },
   },
 
   // ────────────────────────────────────────
@@ -169,7 +191,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "장면 전환 구분선 — 선·장식·색상 수정 가능",
     previewText: "──── ✷ ────",
     keywords: ["가름선", "구분선", "장면", "전환"],
-    code: `/desc [?{구분선|───────}](#" style="text-decoration:none; font-style: normal; color:#선색상;) [?{장식|✷}](#" style="font-style: normal; text-decoration:none; color: #장식색상;) [?{구분선|───────}](#" style="text-decoration:none; font-style: normal; color:#선색상;)`,
+    code: `/desc [?{구분선|───────}](#" style="${PF} text-decoration:none; font-style: normal; color:#선색상;) [?{장식|✷}](#" style="${PF} font-style: normal; text-decoration:none; color: #장식색상;) [?{구분선|───────}](#" style="${PF} text-decoration:none; font-style: normal; color:#선색상;)`,
     fieldDefaults: {
       "color_선색상": "#333333",
       "color_장식색상": "#FF0053",
@@ -183,7 +205,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "챕터 번호와 챕터명 표시",
     previewText: "CHAPTER 1",
     keywords: ["챕터", "chapter", "장면", "제목"],
-    code: `/desc [─────── CHAPTER ?{챕터 숫자|1} ───────](#" style="text-decoration:none; color: #챕터글자색; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색; font-size:12px; font-style: normal;)[?{챕터명|챕터 제목}](#" style="text-decoration:none; color: white; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색; font-style: normal;)`,
+    code: `/desc [─────── CHAPTER ?{챕터 숫자|1} ───────](#" style="${PF} text-decoration:none; color: #챕터글자색; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색; font-size:12px; font-style: normal;)[?{챕터명|챕터 제목}](#" style="${PF} text-decoration:none; color: white; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색; font-style: normal;)`,
     fieldDefaults: {
       "color_챕터글자색": "#ffffff",
       "color_배경색": "#222222",
@@ -197,7 +219,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "BGM 링크 버튼",
     previewText: "💿 BGM ▶ ■",
     keywords: ["bgm", "음악", "브금", "링크"],
-    code: `/desc [💿　　?{BGM제목|10자 이하}　　▶ ■](?{URL|BGM 링크} #" style="margin: 0px 7px 7px 7px; font-size:15px; color: black; background: white; text-align: center; display: inline-block; padding: 5px 15px; font-style: normal !important; font-weight: normal !important; border-radius: 20px; margin-left: 4px; text-decoration: none; border: 1px dashed black; box-shadow: 2px 2px 0 black; letter-spacing: -1px;)`,
+    code: `/desc [💿　　?{BGM제목|10자 이하}　　▶ ■](?{URL|BGM 링크} #" style="${PF} margin: 0px 7px 7px 7px; font-size:15px; color: black; background: white; text-align: center; display: inline-block; padding: 5px 15px; font-style: normal !important; font-weight: normal !important; border-radius: 20px; margin-left: 4px; text-decoration: none; border: 1px dashed black; box-shadow: 2px 2px 0 black; letter-spacing: -1px;)`,
   },
   {
     id: "bgm-v2",
@@ -207,7 +229,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "색상 커스텀 BGM 버튼",
     previewText: "♬ ▶ ■",
     keywords: ["bgm", "음악", "브금", "링크", "ver2"],
-    code: `/desc [♬　　▶ ■　────⊙───────　　0:00](?{URL|BGM 링크} #" style="font-size: 11px; font-family: gulim !important; color: #글자색; background: #배경색; text-align: center; display: inline-block; padding: 5px 15px; font-style: normal !important; font-weight: normal !important; border-radius: 20px; margin-left: -4px; text-decoration: none; border: 1px #선색; box-shadow: 2px 2px 0 #그림자색; letter-spacing: -1px;)`,
+    code: `/desc [♬　　▶ ■　────⊙───────　　0:00](?{URL|BGM 링크} #" style="${PF} font-size: 11px; color: #글자색; background: #배경색; text-align: center; display: inline-block; padding: 5px 15px; font-style: normal !important; font-weight: normal !important; border-radius: 20px; margin-left: -4px; text-decoration: none; border: 1px #선색; box-shadow: 2px 2px 0 #그림자색; letter-spacing: -1px;)`,
     fieldDefaults: {
       "color_글자색": "#333333",
       "color_배경색": "#ffffff",
@@ -223,7 +245,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "시간·날짜 표시 위젯",
     previewText: "🕐 시간 표시",
     keywords: ["시계", "시간", "날짜"],
-    code: `/desc [  ](#" style="content: ''; position: absolute; border: 10px solid transparent; border-color:#버튼색; border-bottom: 0;  margin: -1.5px 0px 0px  21px; text-decoration:none ; border-radius: 5px 5px 5px 5px; box-shadow: 0px 0px 0px black ) [?{시간|00:00 a.m.}　](#" style=" user-select:none; display: inline-block; line-height: 20px; text-decoration:none; position: relative; border:5px solid #바깥색; background:#안쪽색 ; color:#시간색 ; font-size: 14pt; border-radius: 10px 10px 10px 10px;  padding: 8px 54px 6px 8px; box-shadow: 0px 0px 0px black; font-style: normal !important;  )[　　　?{날짜|0000. 00. 00.}](#" style="position:absolute; width:100%; left:0px; font-weight:bold; text-decoration:none; font-size:5pt; padding:16.5px 0px 0px 28.5px; color: #날짜색; font-style: normal !important; )`,
+    code: `/desc [  ](#" style="content: ''; position: absolute; border: 10px solid transparent; border-color:#버튼색; border-bottom: 0;  margin: -1.5px 0px 0px  21px; text-decoration:none ; border-radius: 5px 5px 5px 5px; box-shadow: 0px 0px 0px black ) [?{시간|00:00 a.m.}　](#" style="${PF} user-select:none; display: inline-block; line-height: 20px; text-decoration:none; position: relative; border:5px solid #바깥색; background:#안쪽색 ; color:#시간색 ; font-size: 14pt; border-radius: 10px 10px 10px 10px;  padding: 8px 54px 6px 8px; box-shadow: 0px 0px 0px black; font-style: normal !important;  )[　　　?{날짜|0000. 00. 00.}](#" style="${PF} position:absolute; width:100%; left:0px; font-weight:bold; text-decoration:none; font-size:5pt; padding:16.5px 0px 0px 28.5px; color: #날짜색; font-style: normal !important; )`,
     fieldDefaults: {
       "color_버튼색": "#444444",
       "color_바깥색": "#333333",
@@ -244,7 +266,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "단서나 자료 표시",
     previewText: "🔎 핸드아웃",
     keywords: ["핸드아웃", "정보", "단서", "자료"],
-    code: `/desc [**🔎 ?{핸드아웃 명|핸드아웃} │　** ?{내용|내용을 입력하세요}](#" style="text-decoration:none; color: #2c3e50; font-weight: bold; padding: 8px 12px; margin: 5px 5px 7px 5px; background: #ffffff; line-height: 150%; border: 2px solid darkgrey; box-shadow: -4px 4px 0px darkgrey; display: inline-block;)`,
+    code: `/desc [**🔎 ?{핸드아웃 명|핸드아웃} │　** ?{내용|내용을 입력하세요}](#" style="${PF} text-decoration:none; color: #2c3e50; font-weight: bold; padding: 8px 12px; margin: 5px 5px 7px 5px; background: #ffffff; line-height: 150%; border: 2px solid darkgrey; box-shadow: -4px 4px 0px darkgrey; display: inline-block;)`,
   },
   {
     id: "investigation-point",
@@ -254,7 +276,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "조사 가능한 지점 표시",
     previewText: "◈ 조사 내용",
     keywords: ["조사", "포인트", "단서", "정보"],
-    code: `/desc [?{장식|◈}](#" style="color:#장식색상; font-style: normal; text-decoration:none;) [?{조사 내용|조사할 수 있는 내용을 입력하세요}](#" style="color:#333333;font-style: normal; text-decoration:none;)`,
+    code: `/desc [?{장식|◈}](#" style="${PF} color:#장식색상; font-style: normal; text-decoration:none;) [?{조사 내용|조사할 수 있는 내용을 입력하세요}](#" style="${PF} color:#333333;font-style: normal; text-decoration:none;)`,
     fieldDefaults: {
       "color_장식색상": "#FF0053",
     },
@@ -267,7 +289,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "캐치프레이즈 + 설명 두 줄",
     previewText: "캐치프레이즈",
     keywords: ["얇은 글씨", "캐치프레이즈", "두줄", "정보"],
-    code: `/desc  [?{첫 번째 줄|시나리오의 캐치프레이즈를}](#" style="text-decoration: none; color:#333333; font-size:12px; font-weight: normal;) [?{두 번째 줄|여기에 적으면 괜찮을 것 같아요}](#" style="color:#333333;display:block;text-decoration:none; font-size:12px; font-weight: normal;)`,
+    code: `/desc  [?{첫 번째 줄|시나리오의 캐치프레이즈를}](#" style="${PF} text-decoration: none; color:#333333; font-size:12px; font-weight: normal;) [?{두 번째 줄|여기에 적으면 괜찮을 것 같아요}](#" style="${PF} color:#333333;display:block;text-decoration:none; font-size:12px; font-weight: normal;)`,
   },
   {
     id: "thin-text-one-line",
@@ -277,7 +299,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "한 줄 얇은 글씨",
     previewText: "얇은 글씨",
     keywords: ["얇은 글씨", "한줄", "정보"],
-    code: `/desc [?{내용|물론 한줄로도 됩니다}](#" style="text-decoration: none; color:#333333; font-size:12px; font-weight: normal;)`,
+    code: `/desc [?{내용|물론 한줄로도 됩니다}](#" style="${PF} text-decoration: none; color:#333333; font-size:12px; font-weight: normal;)`,
   },
   {
     id: "kpc-pc",
@@ -287,7 +309,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "KPC·PC 이름 및 생존 여부 표시",
     previewText: "KPC / PC",
     keywords: ["kpc", "pc", "이름", "생존"],
-    code: `/desc [KPC](#" style="font-style: normal; text-decoration:none; color: #강조색;) [?{KPC 이름|KPC 이름}](#" style="font-style: normal; text-decoration:none; color: #333333;)　[PC](#" style="font-style: normal; text-decoration:none; color: #강조색;) [?{PC 이름|PC 이름}](#" style="font-style: normal; text-decoration:none; color: #333333;)`,
+    code: `/desc [KPC](#" style="${PF} font-style: normal; text-decoration:none; color: #강조색;) [?{KPC 이름|KPC 이름}](#" style="${PF} font-style: normal; text-decoration:none; color: #333333;)　[PC](#" style="${PF} font-style: normal; text-decoration:none; color: #강조색;) [?{PC 이름|PC 이름}](#" style="${PF} font-style: normal; text-decoration:none; color: #333333;)`,
     fieldDefaults: {
       "color_강조색": "#FF0053",
     },
@@ -300,7 +322,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "시나리오 작성자 표시",
     previewText: "Written by",
     keywords: ["라이터", "작가", "시나리오", "written"],
-    code: `/desc [Written by](#" style="font-style: normal; text-decoration:none; color: #강조색;) [?{라이터 이름|이름}](#" style="font-style: normal; text-decoration:none; color: #333333;)`,
+    code: `/desc [Written by](#" style="${PF} font-style: normal; text-decoration:none; color: #강조색;) [?{라이터 이름|이름}](#" style="${PF} font-style: normal; text-decoration:none; color: #333333;)`,
     fieldDefaults: {
       "color_강조색": "#FF0053",
     },
@@ -367,37 +389,37 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "색상·기울임·굵게 조합 — 버튼으로 스타일 선택",
     previewText: "할말",
     keywords: ["강조", "색상", "기울임", "굵게", "볼드", "꾸밈"],
-    code: `[?{할말|할말}](#" style="text-decoration:none; color: #색상코드;)`,
+    code: `[?{할말|할말}](#" style="${PF} text-decoration:none; color: #색상코드;)`,
     variants: [
       {
         id: "basic",
         name: "기본",
-        code: `[?{할말|할말}](#" style="text-decoration:none; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:none; color: #색상코드;)`,
       },
       {
         id: "italic",
         name: "기울임",
-        code: `[?{할말|할말}](#" style="text-decoration:none; font-style:italic; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:none; font-style:italic; color: #색상코드;)`,
       },
       {
         id: "bold",
         name: "굵게",
-        code: `[?{할말|할말}](#" style="text-decoration:none; font-weight:bold; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:none; font-weight:bold; color: #색상코드;)`,
       },
       {
         id: "bold-italic",
         name: "굵게+기울임",
-        code: `[?{할말|할말}](#" style="text-decoration:none; font-style:italic; font-weight:bold; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:none; font-style:italic; font-weight:bold; color: #색상코드;)`,
       },
       {
         id: "underline",
         name: "밑줄",
-        code: `[?{할말|할말}](#" style="text-decoration:underline; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:underline; color: #색상코드;)`,
       },
       {
         id: "overline",
         name: "윗줄",
-        code: `[?{할말|할말}](#" style="text-decoration:overline; color: #색상코드;)`,
+        code: `[?{할말|할말}](#" style="${PF} text-decoration:overline; color: #색상코드;)`,
       },
     ],
     fieldDefaults: {
@@ -412,7 +434,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "점선 테두리 박스",
     previewText: "점선 박스",
     keywords: ["점선", "네모", "박스", "강조"],
-    code: `[?{내용|내용}](#" style="text-decoration:none; color:black; border:1px dashed black; padding:2px;)`,
+    code: `[?{내용|내용}](#" style="${PF} text-decoration:none; color:black; border:1px dashed black; padding:2px;)`,
   },
   {
     id: "background-color",
@@ -422,7 +444,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "배경색이 있는 텍스트 블록",
     previewText: "배경색 텍스트",
     keywords: ["배경색", "배경", "강조", "색상"],
-    code: `/desc [?{내용|내용}](#" style="text-decoration:none; color: #글자색; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색;)`,
+    code: `/desc [?{내용|내용}](#" style="${PF} text-decoration:none; color: #글자색; background-color:#배경색; text-align:center; display:block; padding:2px; box-shadow: 0px 8px 0px 15px #배경색;)`,
     fieldDefaults: {
       "color_글자색": "#ffffff",
       "color_배경색": "#B9062F",
@@ -436,7 +458,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "배경색이 있는 인라인 강조",
     previewText: "배경 강조",
     keywords: ["배경", "강조", "인라인"],
-    code: `[?{할말|할말}](#" style="text-decoration:none; color: #글자색; background-color:#배경색; text-align:center; display:block; padding:4px; line-height:1.3;)`,
+    code: `[?{할말|할말}](#" style="${PF} text-decoration:none; color: #글자색; background-color:#배경색; text-align:center; display:block; padding:4px; line-height:1.3;)`,
     fieldDefaults: {
       "color_글자색": "#ffffff",
       "color_배경색": "#B9062F",
@@ -451,7 +473,7 @@ export const macroTemplates: MacroTemplate[] = [
     previewText: "네온 사인",
     previewBackground: "#1a1a2e",
     keywords: ["네온", "사인", "glow", "효과"],
-    code: `[?{내용|네온 사인}](#" style="text-decoration:none; display:block; text-align: center; font-family: Georgia, serif; font-weight: bold; font-style: italic; font-size:15px; line-height:1.3; margin: 0px 0px 7px 0; color: white; text-shadow: 0 0 2px white, 0 0 3px #네온색, 0 0 10px #네온색, 0 0 15px #네온색;)`,
+    code: `[?{내용|네온 사인}](#" style="${PF} text-decoration:none; display:block; text-align: center; font-weight: bold; font-style: italic; font-size:15px; line-height:1.3; margin: 0px 0px 7px 0; color: white; text-shadow: 0 0 2px white, 0 0 3px #네온색, 0 0 10px #네온색, 0 0 15px #네온색;)`,
     fieldDefaults: {
       "color_네온색": "#FF0053",
     },
@@ -468,7 +490,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "꼬리가 있는 기본 말풍선",
     previewText: "할말",
     keywords: ["말풍선", "대화", "채팅"],
-    code: `[?{할말|할말}](#" style="position: relative; background: #말풍선색; color: #글자색; border-radius: .4em; padding:6px; user-select:none; display:block; line-height:1.5; text-decoration:none;) [ ](#" style="content: ''; position: absolute; border: 12px solid transparent; border-right-color: #말풍선색; border-left: 0; border-bottom: 0; margin-top: -25px; margin-left: -10px; line-height:1.3; text-decoration:none;)`,
+    code: `[?{할말|할말}](#" style="${PF} position: relative; background: #말풍선색; color: #글자색; border-radius: .4em; padding:6px; user-select:none; display:block; line-height:1.5; text-decoration:none;) [ ](#" style="content: ''; position: absolute; border: 12px solid transparent; border-right-color: #말풍선색; border-left: 0; border-bottom: 0; margin-top: -25px; margin-left: -10px; line-height:1.3; text-decoration:none;)`,
     fieldDefaults: {
       "color_말풍선색": "#ffffff",
       "color_글자색": "#333333",
@@ -482,7 +504,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "카카오톡 스타일 — 흰색 말풍선",
     previewText: "받은 메시지",
     keywords: ["카톡", "받은", "메시지", "하얀색"],
-    code: `[?{내용|받은 메시지}](#" style="color:black; background: white; border-radius: 0px 15px 15px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　 [?{오전오후|PM|AM}](#" style="text-decoration:none; text-align:right; color:black; font-size:10px;) [?{시간|12:00}](#" style="text-decoration:none; text-align:right; color: black; font-size:10px;)`,
+    code: `[?{내용|받은 메시지}](#" style="${PF} color:black; background: white; border-radius: 0px 15px 15px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　 [?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; text-align:right; color:black; font-size:10px;) [?{시간|12:00}](#" style="${PF} text-decoration:none; text-align:right; color: black; font-size:10px;)`,
   },
   {
     id: "kakao-sent",
@@ -492,7 +514,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "카카오톡 스타일 — 노란색 말풍선",
     previewText: "보낸 메시지",
     keywords: ["카톡", "보낸", "메시지", "노란색"],
-    code: `[?{오전오후|PM|AM}](#" style="text-decoration:none; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:10px;)　[?{내용|보낸 메시지}](#" style="color:black; background: #FFEB33; border-radius: 15px 0px 15px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
+    code: `[?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:10px;)　[?{내용|보낸 메시지}](#" style="${PF} color:black; background: #FFEB33; border-radius: 15px 0px 15px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
   },
   {
     id: "iphone-sent-blue",
@@ -502,7 +524,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "iMessage 스타일 — 파란색 말풍선",
     previewText: "보낸 메시지",
     keywords: ["아이폰", "imessage", "파란색", "보낸"],
-    code: `[?{내용|보낸 메시지}](#" style="color:white; background: #3478F6; border-radius: 15px 15px 15px 0px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　[?{오전오후|PM|AM}](#" style="text-decoration:none; line-height:1.3; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:9px;)`,
+    code: `[?{내용|보낸 메시지}](#" style="${PF} color:white; background: #3478F6; border-radius: 15px 15px 15px 0px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　[?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:9px;)`,
   },
   {
     id: "iphone-received-white",
@@ -512,7 +534,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "iMessage 스타일 — 흰색 말풍선",
     previewText: "받은 메시지",
     keywords: ["아이폰", "imessage", "흰색", "받은"],
-    code: `[?{오전오후|PM|AM}](#" style="text-decoration:none; line-height:1.3; text-align:right; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="text-decoration:none; line-height:1.3; text-align:right; color: black; font-size:9px;)　[?{내용|받은 메시지}](#" style="color:black; background: #F8F8F8; border-radius: 15px 15px 0px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
+    code: `[?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:right; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:right; color: black; font-size:9px;)　[?{내용|받은 메시지}](#" style="${PF} color:black; background: #F8F8F8; border-radius: 15px 15px 0px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
   },
   {
     id: "iphone-received-green",
@@ -522,7 +544,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "SMS 스타일 — 초록색 받은 말풍선",
     previewText: "받은 메시지",
     keywords: ["아이폰", "sms", "초록색", "받은"],
-    code: `[?{오전오후|PM|AM}](#" style="text-decoration:none; line-height:1.3; text-align:right; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="text-decoration:none; line-height:1.3; text-align:right; color: black; font-size:9px;)　[?{내용|받은 메시지}](#" style="color:white; background: #6AD06C; border-radius: 15px 15px 0px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
+    code: `[?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:right; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:right; color: black; font-size:9px;)　[?{내용|받은 메시지}](#" style="${PF} color:white; background: #6AD06C; border-radius: 15px 15px 0px 15px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:right; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)`,
   },
   {
     id: "iphone-sent-green",
@@ -532,7 +554,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "SMS 스타일 — 초록색 말풍선",
     previewText: "보낸 메시지",
     keywords: ["아이폰", "sms", "초록색", "보낸"],
-    code: `[?{내용|보낸 메시지}](#" style="color:black; background: #F8F8F8; border-radius: 15px 15px 15px 0px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　[?{오전오후|PM|AM}](#" style="text-decoration:none; line-height:1.3; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:9px;)`,
+    code: `[?{내용|보낸 메시지}](#" style="${PF} color:black; background: #F8F8F8; border-radius: 15px 15px 15px 0px; padding: 8px; display: inline-block; line-height:1.3; box-shadow: 1px 1px 1px 1px #97A9B9; text-align:left; text-decoration:none; margin: 0px 0px 3px 0px; word-break:keep-all;)　[?{오전오후|PM|AM}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:left; color:black; font-size:9px;) [ ?{시간|12:00}](#" style="${PF} text-decoration:none; line-height:1.3; text-align:left; color: black; font-size:9px;)`,
   },
   {
     id: "line-received",
@@ -542,7 +564,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "LINE 스타일 — 초록색 말풍선",
     previewText: "받은 메시지",
     keywords: ["라인", "line", "초록", "받은"],
-    code: `[?{시간|12:00}](#" style="text-decoration:none; color: #666666; font-size:9px;) [읽음](#" style="text-decoration:none; color: #666666; font-size:9px;)　[?{내용|받은 메시지}](#" style="text-decoration:none; color: black; background: #C0EC95; border: 5px solid: #C0EC95; border-radius: 20px 0px 20px 20px; padding: 8px; margin: 0px 0px 3px 0px; box-shadow: 1px 1px 1px 1px #799096; display: inline-block; line-height:1.3; text-align:right; word-break:keep-all;)`,
+    code: `[?{시간|12:00}](#" style="${PF} text-decoration:none; color: #666666; font-size:9px;) [읽음](#" style="${PF} text-decoration:none; color: #666666; font-size:9px;)　[?{내용|받은 메시지}](#" style="${PF} text-decoration:none; color: black; background: #C0EC95; border: 5px solid: #C0EC95; border-radius: 20px 0px 20px 20px; padding: 8px; margin: 0px 0px 3px 0px; box-shadow: 1px 1px 1px 1px #799096; display: inline-block; line-height:1.3; text-align:right; word-break:keep-all;)`,
   },
   {
     id: "line-sent",
@@ -552,7 +574,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "LINE 스타일 — 흰색 말풍선",
     previewText: "보낸 메시지",
     keywords: ["라인", "line", "흰색", "보낸"],
-    code: `[?{내용|보낸 메시지}](#" style="text-decoration:none; color: black; background: #F1F1F1; border: 5px solid: #F1F1F1; border-radius: 0px 20px 20px 20px; box-shadow: 1px 1px 1px 1px #799096; padding: 8px; display: inline-block; margin: 0px 0px 3px 0px; line-height:1.3; text-align:left; word-break:keep-all;)　[읽음](#" style="text-decoration:none; color: #666666; font-size:9px;) [?{시간|12:00}](#" style="text-decoration:none; color: #666666; font-size:9px;)`,
+    code: `[?{내용|보낸 메시지}](#" style="${PF} text-decoration:none; color: black; background: #F1F1F1; border: 5px solid: #F1F1F1; border-radius: 0px 20px 20px 20px; box-shadow: 1px 1px 1px 1px #799096; padding: 8px; display: inline-block; margin: 0px 0px 3px 0px; line-height:1.3; text-align:left; word-break:keep-all;)　[읽음](#" style="${PF} text-decoration:none; color: #666666; font-size:9px;) [?{시간|12:00}](#" style="${PF} text-decoration:none; color: #666666; font-size:9px;)`,
   },
 
   // ────────────────────────────────────────
@@ -562,13 +584,14 @@ export const macroTemplates: MacroTemplate[] = [
     id: "madness-current",
     categoryId: "effect",
     order: 1,
-    name: "광기 현재화",
-    memo: "피시명과 광기 현재화 연출 — 네온 색상 수정 가능",
-    previewText: "광기 현재화",
+    name: "이성치 감소",
+    memo: "이성치 감소 연출 — 텍스트 색상과 네온 그림자 수정 가능",
+    previewText: "이성치 1 감소",
     previewBackground: "#1a1a2e",
-    keywords: ["광기", "현재화", "인세인", "연출"],
-    code: `/desc [?{피시명|캐릭터명}](#" style="text-decoration:none; color: white; font-size: 17px; font-weight: bold; text-shadow:1px 2px 1px #네온색1,-2px 2px 1px #네온색2)의 [광기 현재화](#" style="text-decoration:none; color: white; font-size: 17px; text-shadow:1px 1px 1px #네온색1,-2px 1px 1px #네온색2)`,
+    keywords: ["이성치", "감소", "광기", "인세인", "연출"],
+    code: `/desc [?{내용|이성치 1 감소}](#" style="${PF} text-decoration:none; color: #텍스트색상; font-size: 15px; font-weight: bold; text-shadow:1px 2px 1px #네온색1,-2px 2px 1px #네온색2)`,
     fieldDefaults: {
+      "color_텍스트색상": "#322F89",
       "color_네온색1": "#77FFC8",
       "color_네온색2": "#DB91FF",
     },
@@ -581,7 +604,7 @@ export const macroTemplates: MacroTemplate[] = [
     memo: "퍼센트 직접 입력형 체력바 — 색상 수정 가능",
     previewText: "체력바",
     keywords: ["게이지", "체력바", "hp", "퍼센트"],
-    code: `/desc [?{퍼센트|70}%](#" style="color:#ffffff; border:1px solid black; margin:1px;text-align:center;user-select:none;display:block;padding:2px;text-decoration:none;background-image: linear-gradient(to right&#44; #체력색상 ?{퍼센트|70}%&#44; #빈색상 ?{퍼센트|70}%&#41;)`,
+    code: `/desc [?{퍼센트|70}%](#" style="${PF} color:#ffffff; border:1px solid black; margin:1px;text-align:center;user-select:none;display:block;padding:2px;text-decoration:none;background-image: linear-gradient(to right&#44; #체력색상 ?{퍼센트|70}%&#44; #빈색상 ?{퍼센트|70}%&#41;)`,
     fieldDefaults: {
       "color_체력색상": "#C9151E",
       "color_빈색상": "#000000",
