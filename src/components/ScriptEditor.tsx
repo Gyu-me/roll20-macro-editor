@@ -65,7 +65,8 @@ export default function ScriptEditor({
   onDeleteLineInOption,
   onChangeLabelInOption,
 }: Props) {
-  const [lastCopied, setLastCopied] = useState<string | null>(null);
+  const [lastCopied, setLastCopied] = useState<{ text: string; num: number; subNum?: number } | null>(null);
+  const [lastCopiedId, setLastCopiedId] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(scenario.title);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -177,7 +178,7 @@ export default function ScriptEditor({
             </p>
           ) : (
             <div className="script-lines">
-              {scenario.lines.map((node) => {
+              {scenario.lines.map((node, index) => {
                 const isDragging = draggingId === node.id;
                 const isDropBefore = dropInfo?.id === node.id && dropInfo.pos === "before";
                 const isDropAfter = dropInfo?.id === node.id && dropInfo.pos === "after";
@@ -190,6 +191,7 @@ export default function ScriptEditor({
                       isDragging ? "is-dragging" : "",
                       isDropBefore ? "drop-before" : "",
                       isDropAfter ? "drop-after" : "",
+                      isMastering && node.type !== "branch" && lastCopiedId === node.id ? "is-last-copied" : "",
                     ].filter(Boolean).join(" ")}
                     draggable={!isMastering}
                     onDragStart={(e) => handleDragStart(e, node.id)}
@@ -198,6 +200,10 @@ export default function ScriptEditor({
                     onDrop={(e) => handleDrop(e, node.id)}
                     onDragEnd={handleDragEnd}
                   >
+                    <div className={`script-line-num${isMastering ? " mastering" : ""}`}>
+                      {index + 1}
+                    </div>
+
                     {!isMastering && (
                       <div className="script-drag-handle" title="드래그하여 순서 변경">
                         ⠿
@@ -208,6 +214,8 @@ export default function ScriptEditor({
                       {node.type === "branch" ? (
                         <BranchBlock
                           branch={node}
+                          branchNum={index + 1}
+                          lastCopiedLineId={lastCopiedId}
                           labels={labels}
                           platformMode={platformMode}
                           editorMode={editorMode}
@@ -222,7 +230,7 @@ export default function ScriptEditor({
                           onUpdateLineInOption={onUpdateLineInOption}
                           onDeleteLineInOption={onDeleteLineInOption}
                           onChangeLabelInOption={onChangeLabelInOption}
-                          onCopied={setLastCopied}
+                          onCopied={(text, lineId, subNum) => { setLastCopied({ text, num: index + 1, subNum }); setLastCopiedId(lineId); }}
                         />
                       ) : (
                         <ScriptLineItem
@@ -235,7 +243,7 @@ export default function ScriptEditor({
                           onChangeLabel={onChangeLabelId}
                           onDelete={onDeleteLine}
                           onAddAfter={(labelId, afterId) => onAddLine(labelId, afterId)}
-                          onCopied={setLastCopied}
+                          onCopied={(text) => { setLastCopied({ text, num: index + 1 }); setLastCopiedId(node.id); }}
                         />
                       )}
                     </div>
@@ -253,7 +261,10 @@ export default function ScriptEditor({
           {lastCopied ? (
             <>
               <span className="mastering-bar-hint">마지막 복사:</span>
-              <span className="mastering-bar-code">{lastCopied}</span>
+              <span className="mastering-bar-num">
+                #{lastCopied.subNum ? `${lastCopied.num}-${lastCopied.subNum}` : lastCopied.num}
+              </span>
+              <span className="mastering-bar-code">{lastCopied.text}</span>
             </>
           ) : (
             <span className="mastering-bar-hint">

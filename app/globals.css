@@ -1117,6 +1117,42 @@ textarea:focus {
   gap: 4px;
 }
 
+/* ── 행 번호 ────────────────────────────────────────────── */
+
+.script-line-num {
+  flex: 0 0 28px;
+  width: 28px;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-top: 10px;
+  padding-right: 5px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #999999;
+  user-select: none;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+
+.script-node-wrap:hover .script-line-num {
+  color: #555555;
+}
+
+.script-line-num.mastering {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888888;
+  opacity: 1;
+  padding-top: 9px;
+}
+
+.script-node-wrap.is-last-copied .script-line-num {
+  color: #7eb3ff;
+  font-weight: 700;
+}
+
 /* ── 드래그 래퍼 ────────────────────────────────────────── */
 
 .script-node-wrap {
@@ -1401,6 +1437,32 @@ textarea:focus {
   border-color: #555555 !important;
 }
 
+.branch-line-wrap {
+  display: flex;
+  align-items: flex-start;
+}
+
+.branch-line-wrap > .script-line {
+  flex: 1;
+  min-width: 0;
+}
+
+.branch-line-num {
+  font-size: 10px;
+  min-width: 32px;
+  letter-spacing: -0.5px;
+}
+
+.script-node-wrap.is-last-copied .line-content-display {
+  background: #f0f4ff !important;
+  border-color: #7eb3ff !important;
+}
+
+.script-node-wrap.is-last-copied .line-label-badge {
+  outline: 2px solid #7eb3ff;
+  outline-offset: 1px;
+}
+
 .type-divider .line-content-display {
   background: transparent !important;
   border: none !important;
@@ -1465,6 +1527,14 @@ textarea:focus {
 .mastering-bar-hint {
   color: #aaaaaa;
   flex-shrink: 0;
+}
+
+.mastering-bar-num {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #7eb3ff;
+  min-width: 28px;
 }
 
 .mastering-bar-code {
