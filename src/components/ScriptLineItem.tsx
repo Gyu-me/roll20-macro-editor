@@ -62,13 +62,17 @@ export default function ScriptLineItem({
   const output = getLineOutput(line, label, platformMode);
 
   const handleMasteringClick = async () => {
-    if (!output) return;
+    if (!output) {
+      setJustCopied(true);
+      setTimeout(() => setJustCopied(false), 600);
+      return;
+    }
     try {
       await navigator.clipboard.writeText(output);
       onCopied(output);
-      setJustCopied(true);
-      setTimeout(() => setJustCopied(false), 800);
     } catch {}
+    setJustCopied(true);
+    setTimeout(() => setJustCopied(false), 800);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
