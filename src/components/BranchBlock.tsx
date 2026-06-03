@@ -12,6 +12,7 @@ import type {
 
 type Props = {
   branch: BranchBlockType;
+  branchNum: number;
   labels: LabelSetting[];
   platformMode: PlatformMode;
   editorMode: EditorMode;
@@ -30,11 +31,14 @@ type Props = {
   onUpdateLineInOption: (branchId: string, optionId: string, lineId: string, content: string) => void;
   onDeleteLineInOption: (branchId: string, optionId: string, lineId: string) => void;
   onChangeLabelInOption: (branchId: string, optionId: string, lineId: string, labelId: string) => void;
-  onCopied: (text: string) => void;
+  lastCopiedLineId?: string | null;
+  onCopied: (text: string, lineId: string, subNum: number) => void;
 };
 
 export default function BranchBlock({
   branch,
+  branchNum,
+  lastCopiedLineId,
   labels,
   platformMode,
   editorMode,
@@ -140,6 +144,8 @@ export default function BranchBlock({
               key={option.id}
               option={option}
               branchId={branch.id}
+              branchNum={branchNum}
+              lastCopiedLineId={lastCopiedLineId}
               labels={labels}
               platformMode={platformMode}
               editorMode={editorMode}
@@ -176,6 +182,8 @@ export default function BranchBlock({
 type OptionProps = {
   option: BranchOption;
   branchId: string;
+  branchNum: number;
+  lastCopiedLineId?: string | null;
   labels: LabelSetting[];
   platformMode: PlatformMode;
   editorMode: EditorMode;
@@ -193,12 +201,14 @@ type OptionProps = {
   onUpdateLine: (branchId: string, optionId: string, lineId: string, content: string) => void;
   onDeleteLine: (branchId: string, optionId: string, lineId: string) => void;
   onChangeLabel: (branchId: string, optionId: string, lineId: string, labelId: string) => void;
-  onCopied: (text: string) => void;
+  onCopied: (text: string, lineId: string, subNum: number) => void;
 };
 
 function BranchOptionCard({
   option,
   branchId,
+  branchNum,
+  lastCopiedLineId,
   labels,
   platformMode,
   editorMode,
@@ -338,20 +348,30 @@ function BranchOptionCard({
             </p>
           ) : (
             <div className="branch-option-lines">
-              {option.lines.map((line) => (
-                <ScriptLineItem
+              {option.lines.map((line, lineIdx) => (
+                <div
                   key={line.id}
-                  line={line}
-                  label={getLabelForLine(line)}
-                  labels={labels}
-                  platformMode={platformMode}
-                  editorMode={editorMode}
-                  onUpdate={(lineId, content) => onUpdateLine(branchId, option.id, lineId, content)}
-                  onChangeLabel={(lineId, labelId) => onChangeLabel(branchId, option.id, lineId, labelId)}
-                  onDelete={(lineId) => onDeleteLine(branchId, option.id, lineId)}
-                  onAddAfter={(labelId, afterId) => onAddLine(branchId, option.id, labelId, afterId)}
-                  onCopied={onCopied}
-                />
+                  className={[
+                    "branch-line-wrap",
+                    isMastering && lastCopiedLineId === line.id ? "is-last-copied" : "",
+                  ].filter(Boolean).join(" ")}
+                >
+                  <div className={`script-line-num branch-line-num${isMastering ? " mastering" : ""}`}>
+                    {branchNum}-{lineIdx + 1}
+                  </div>
+                  <ScriptLineItem
+                    line={line}
+                    label={getLabelForLine(line)}
+                    labels={labels}
+                    platformMode={platformMode}
+                    editorMode={editorMode}
+                    onUpdate={(lineId, content) => onUpdateLine(branchId, option.id, lineId, content)}
+                    onChangeLabel={(lineId, labelId) => onChangeLabel(branchId, option.id, lineId, labelId)}
+                    onDelete={(lineId) => onDeleteLine(branchId, option.id, lineId)}
+                    onAddAfter={(labelId, afterId) => onAddLine(branchId, option.id, labelId, afterId)}
+                    onCopied={(text) => onCopied(text, line.id, lineIdx + 1)}
+                  />
+                </div>
               ))}
             </div>
           )}
